@@ -5,6 +5,7 @@ import pluginReact from 'eslint-plugin-react'
 import pluginReactHooks from 'eslint-plugin-react-hooks'
 import prettier from 'eslint-config-prettier'
 import { defineConfig } from 'eslint/config'
+import pluginZod from 'eslint-plugin-zod'
 
 export default defineConfig([
   {
@@ -23,6 +24,7 @@ export default defineConfig([
       '@typescript-eslint': tseslint.plugin,
       react: pluginReact,
       'react-hooks': pluginReactHooks,
+      zod: pluginZod,
     },
     rules: {
       ...js.configs.recommended.rules,
@@ -35,11 +37,16 @@ export default defineConfig([
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
       'react/prop-types': 'off',
-      "no-unused-vars": ["warn", { varsIgnorePattern: "^_", argsIgnorePattern: "^_" }],
+      'no-unused-vars': 'off',      
+
+      'zod/prefer-zod-methods': 'warn', 
+
+      '@typescript-eslint/consistent-type-definitions': ['warn', 'type'],
+      '@typescript-eslint/explicit-function-return-type': ['warn', { allowExpressions: true }],
     },
   },
   {
-    ignores: ['node_modules', 'dist'],
+    ignores: ['node_modules', 'dist', 'build'],
   },
   {
     files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'],
