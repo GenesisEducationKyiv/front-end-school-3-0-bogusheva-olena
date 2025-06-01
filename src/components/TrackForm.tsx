@@ -3,26 +3,28 @@ import { FormikErrors, FormikHelpers, useFormik } from "formik";
 import Loader from "../ui/Loader";
 
 import CloseIcon from "../assets/icons/close.svg?react";
-import { Track } from "../types";
+import { Track, TrackFormValues } from "../types";
+import { trackFormSchema } from "../schemas/schemas";
 
 interface Props {
     genres: string[];
     closeModal: () => void;
     isLoading: boolean;
-    onSubmit: (values: FormValues, formikHelpers: FormikHelpers<FormValues>) => void;
+    onSubmit: (
+        values: TrackFormValues,
+        formikHelpers: FormikHelpers<TrackFormValues>,
+    ) => void;
     track?: Track;
 }
 
-export interface FormValues {
-    title: string;
-    artist: string;
-    album: string;
-    genres: string[];
-    coverImage: string;
-}
-
-export default function TrackForm({ genres, closeModal, onSubmit, isLoading, track }: Props) {
-    const formik = useFormik<FormValues>({
+export default function TrackForm({
+    genres,
+    closeModal,
+    onSubmit,
+    isLoading,
+    track,
+}: Props) {
+    const formik = useFormik<TrackFormValues>({
         initialValues: {
             title: track?.title || "",
             artist: track?.artist || "",
@@ -32,20 +34,20 @@ export default function TrackForm({ genres, closeModal, onSubmit, isLoading, tra
         },
         enableReinitialize: true,
         validate: (values) => {
-            const errors: FormikErrors<FormValues> = {};
-            if (!values.title) {
-                errors.title = "Title is required";
-            }
-            if (!values.artist) {
-                errors.artist = "Artist is required";
-            }
-            if (values.genres.length === 0) {
-                errors.genres = "At least one genre is required";
-            }
-            if (values.coverImage && !/^https?:\/\/.+/.test(values.coverImage)) {
-                errors.coverImage = "Cover image must be a valid image URL";
-            }
-            return errors;
+            const result = trackFormSchema.safeParse(values);
+            if (result.success) return {};
+
+            const fieldErrors = result.error.flatten().fieldErrors;
+
+            const formikErrors: FormikErrors<TrackFormValues> =
+                Object.fromEntries(
+                    Object.entries(fieldErrors).map(([key, val]) => [
+                        key,
+                        val?.[0],
+                    ]),
+                );
+
+            return formikErrors;
         },
         onSubmit,
     });
@@ -59,7 +61,7 @@ export default function TrackForm({ genres, closeModal, onSubmit, isLoading, tra
     const removeGenre = (genre: string) => {
         formik.setFieldValue(
             "genres",
-            formik.values.genres.filter((g) => g !== genre)
+            formik.values.genres.filter((g) => g !== genre),
         );
     };
     return (
@@ -78,7 +80,10 @@ export default function TrackForm({ genres, closeModal, onSubmit, isLoading, tra
                     data-testid="input-title"
                 />
                 {formik.touched.title && formik.errors.title && (
-                    <p className="text-red-500 text-sm" data-testid="error-title">
+                    <p
+                        className="text-red-500 text-sm"
+                        data-testid="error-title"
+                    >
                         {formik.errors.title}
                     </p>
                 )}
@@ -97,7 +102,10 @@ export default function TrackForm({ genres, closeModal, onSubmit, isLoading, tra
                     data-testid="input-artist"
                 />
                 {formik.touched.artist && formik.errors.artist && (
-                    <p className="text-red-500 text-sm" data-testid="error-artist">
+                    <p
+                        className="text-red-500 text-sm"
+                        data-testid="error-artist"
+                    >
                         {formik.errors.artist}
                     </p>
                 )}
@@ -130,14 +138,20 @@ export default function TrackForm({ genres, closeModal, onSubmit, isLoading, tra
                     data-testid="input-cover-image"
                 />
                 {formik.errors.coverImage && (
-                    <p className="text-red-500 text-sm" data-testid="error-coverImage">
+                    <p
+                        className="text-red-500 text-sm"
+                        data-testid="error-coverImage"
+                    >
                         {formik.errors.coverImage}
                     </p>
                 )}
             </div>
             <div className="mb-4">
                 <label className="font-semibold">Genres</label>
-                <div className="flex flex-wrap gap-2 mt-2" data-testid="genre-selector">
+                <div
+                    className="flex flex-wrap gap-2 mt-2"
+                    data-testid="genre-selector"
+                >
                     {formik.values.genres.map((genre) => (
                         <span
                             key={genre}
@@ -156,7 +170,10 @@ export default function TrackForm({ genres, closeModal, onSubmit, isLoading, tra
                     ))}
                 </div>
                 {formik.touched.genres && formik.errors.genres && (
-                    <p className="text-red-500 text-sm" data-testid="error-genres">
+                    <p
+                        className="text-red-500 text-sm"
+                        data-testid="error-genres"
+                    >
                         {formik.errors.genres}
                     </p>
                 )}

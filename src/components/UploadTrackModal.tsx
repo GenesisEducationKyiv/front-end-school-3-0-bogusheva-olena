@@ -1,7 +1,7 @@
 import { ChangeEvent, useState } from "react";
 
 import { Track } from "../types";
-import { deleteTrackFile, uploadTrack } from "../api/tracks";
+import { deleteTrackFile, uploadTrackFile } from "../api/tracks";
 
 import { useTrackList } from "../context/track-list-context";
 import { useToast } from "../hooks/useToast";
@@ -16,7 +16,11 @@ interface Props {
     closeModal: () => void;
 }
 
-export default function UploadTrackModal({ isModalOpened, closeModal, track }: Props) {
+export default function UploadTrackModal({
+    isModalOpened,
+    closeModal,
+    track,
+}: Props) {
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -46,15 +50,22 @@ export default function UploadTrackModal({ isModalOpened, closeModal, track }: P
 
         setIsLoading(true);
 
-        uploadTrack(track.id, file)
-            .then(() => {
-                showToast("Track uploaded successfully!", "success");
-                updateTrackList();
-                closeModal();
-            })
-            .catch((error) => {
-                showToast("Failed to upload the track. Please try again.", "error");
-                console.error("Error uploading track:", error);
+        uploadTrackFile(track.id, file)
+            .then((res) => {
+                res.match(
+                    () => {
+                        showToast("Track uploaded successfully!", "success");
+                        updateTrackList();
+                        closeModal();
+                    },
+                    (error) => {
+                        showToast(
+                            "Failed to upload the track. Please try again.",
+                            "error",
+                        );
+                        console.error("Error uploading track:", error);
+                    },
+                );
             })
             .finally(() => {
                 setIsLoading(false);
@@ -69,14 +80,24 @@ export default function UploadTrackModal({ isModalOpened, closeModal, track }: P
         updateTrackInList({ ...track, audioFile: null });
 
         deleteTrackFile(track.id)
-            .then(() => {
-                showToast("Track file deleted successfully!", "success");
-                closeModal();
-            })
-            .catch((error) => {
-                showToast("Failed to delete the track file. Please try again.", "error");
-                updateTrackInList(originalTrack);
-                console.error("Error deleting track file:", error);
+            .then((res) => {
+                res.match(
+                    () => {
+                        showToast(
+                            "Track file deleted successfully!",
+                            "success",
+                        );
+                        closeModal();
+                    },
+                    (error) => {
+                        showToast(
+                            "Failed to delete the track file. Please try again.",
+                            "error",
+                        );
+                        updateTrackInList(originalTrack);
+                        console.error("Error deleting track file:", error);
+                    },
+                );
             })
             .finally(() => {
                 setIsLoading(false);
@@ -92,14 +113,20 @@ export default function UploadTrackModal({ isModalOpened, closeModal, track }: P
         >
             <div className="mb-4">
                 <p>
-                    {track.audioFile ? "Do you want to remove the audio file?" : "Upload the audio file for the track:"}
+                    {track.audioFile
+                        ? "Do you want to remove the audio file?"
+                        : "Upload the audio file for the track:"}
                 </p>
                 <p className="font-bold">
                     {track.artist} - {track.title}
                 </p>
                 {track.audioFile ? (
                     <div>
-                        <audio controls src={`${PATH}${track.audioFile}`} className="w-full mt-2" />
+                        <audio
+                            controls
+                            src={`${PATH}${track.audioFile}`}
+                            className="w-full mt-2"
+                        />
                     </div>
                 ) : (
                     <input
@@ -122,7 +149,9 @@ export default function UploadTrackModal({ isModalOpened, closeModal, track }: P
                         data-loading={isLoading || undefined}
                         className="flex bg-red-600 text-white px-4 py-2 rounded hover:bg-green-700"
                     >
-                        {isLoading && <Loader className="mr-2 [&>*]:fill-white" />}
+                        {isLoading && (
+                            <Loader className="mr-2 [&>*]:fill-white" />
+                        )}
                         {isLoading ? "Removing..." : "Remove file"}
                     </button>
                 ) : (
@@ -135,7 +164,9 @@ export default function UploadTrackModal({ isModalOpened, closeModal, track }: P
                         data-testid="track-modal-upload-button"
                         onClick={handleUploadFile}
                     >
-                        {isLoading && <Loader className="mr-2 [&>*]:fill-white" />}
+                        {isLoading && (
+                            <Loader className="mr-2 [&>*]:fill-white" />
+                        )}
                         Upload
                     </button>
                 )}

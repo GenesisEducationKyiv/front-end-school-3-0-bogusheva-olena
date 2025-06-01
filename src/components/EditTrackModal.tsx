@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Track } from "../types";
+import { Track, TrackFormValues } from "../types";
 import { updateTrack } from "../api/tracks";
 
 import { useTrackList } from "../context/track-list-context";
@@ -15,22 +15,19 @@ interface Props {
     isModalOpened: boolean;
     closeModal: () => void;
 }
-interface FormValues {
-    title: string;
-    artist: string;
-    album: string;
-    genres: string[];
-    coverImage: string;
-}
 
-export default function EditTrackModal({ isModalOpened, closeModal, track }: Props) {
+export default function EditTrackModal({
+    isModalOpened,
+    closeModal,
+    track,
+}: Props) {
     const [isLoading, setIsLoading] = useState(false);
 
     const { updateTrackInList } = useTrackList();
     const { showToast } = useToast();
     const { genres, isLoadingGenres } = useGenres();
 
-    const handleSubmit = (values: FormValues) => {
+    const handleSubmit = (values: TrackFormValues) => {
         if (!track?.id) return;
         setIsLoading(true);
 
@@ -39,15 +36,29 @@ export default function EditTrackModal({ isModalOpened, closeModal, track }: Pro
 
         updateTrackInList(updatedTrack);
 
-        updateTrack(track.id, values.title, values.artist, values.album, values.genres, values.coverImage)
-            .then(() => {
-                showToast("Track updated successfully!", "success");
-                closeModal();
-            })
-            .catch((error) => {
-                showToast("Failed to update track. Please try again.", "error");
-                updateTrackInList(prevTrack);
-                console.error("Error updating track:", error);
+        updateTrack(
+            track.id,
+            values.title,
+            values.artist,
+            values.album ?? "",
+            values.genres,
+            values.coverImage ?? "",
+        )
+            .then((res) => {
+                res.match(
+                    (_) => {
+                        showToast("Track updated successfully!", "success");
+                        closeModal();
+                    },
+                    (error) => {
+                        showToast(
+                            "Failed to update track. Please try again.",
+                            "error",
+                        );
+                        updateTrackInList(prevTrack);
+                        console.error("Error updating track:", error);
+                    },
+                );
             })
             .finally(() => {
                 setIsLoading(false);
@@ -55,7 +66,12 @@ export default function EditTrackModal({ isModalOpened, closeModal, track }: Pro
     };
 
     return (
-        <Modal isOpened={isModalOpened} onClose={closeModal} title={"Edit Track"} name={`edit-track`}>
+        <Modal
+            isOpened={isModalOpened}
+            onClose={closeModal}
+            title={"Edit Track"}
+            name={`edit-track`}
+        >
             <TrackForm
                 track={track}
                 genres={genres}

@@ -1,50 +1,29 @@
-import { Track } from "../types";
 import { api } from "./axios";
+import { z } from "zod";
+import { Result, ok, err } from "neverthrow";
+import { GetTracksParams, Track } from "../types";
+import { trackSchema, getTracksResponseSchema } from "../schemas/schemas";
 
-export type GetTracksParams = {
-    page?: number;
-    limit?: number;
-    sort?: "title" | "artist" | "album" | "createdAt";
-    order?: "asc" | "desc";
-    search?: string;
-    genre?: string;
-    artist?: string;
-};
-
-type GetTracksResponse = {
-    data: Track[];
-    meta: {
-        total: number;
-        page: number;
-        limit: number;
-        totalPages: number;
-    };
-};
-
-type GetTrackBySlugResponse = {
-    id: string;
-    title: string;
-    artist: string;
-    genres: string[];
-    slug: string;
-    coverImage: string;
-    createdAt: string;
-    updatedAt: string;
-};
-
-export async function getTracks(params?: GetTracksParams): Promise<GetTracksResponse> {
-    const res = await api.get<GetTracksResponse>("/tracks", { params });
-    return res.data;
+export async function getTracks(
+    params?: GetTracksParams,
+): Promise<Result<z.infer<typeof getTracksResponseSchema>, Error>> {
+    try {
+        const res = await api.get("/tracks", { params });
+        return ok(getTracksResponseSchema.parse(res.data));
+    } catch (e) {
+        return err(e instanceof Error ? e : new Error("Unknown error"));
+    }
 }
 
-export async function getAllTracks(): Promise<GetTracksResponse> {
-    const res = await api.get<GetTracksResponse>("/tracks", { params: { limit: 1000000 } });
-    return res.data;
-}
-
-export async function getTrackBySlug(slug: string): Promise<Track> {
-    const res = await api.get<GetTrackBySlugResponse>(`/tracks/${slug}`);
-    return res.data;
+export async function getAllTracks(): Promise<
+    Result<z.infer<typeof getTracksResponseSchema>, Error>
+> {
+    try {
+        const res = await api.get("/tracks", { params: { limit: 1000000 } });
+        return ok(getTracksResponseSchema.parse(res.data));
+    } catch (e) {
+        return err(e instanceof Error ? e : new Error("Unknown error"));
+    }
 }
 
 export async function updateTrack(
@@ -53,16 +32,20 @@ export async function updateTrack(
     artist: string,
     album?: string,
     genres?: string[],
-    coverImage?: string
-): Promise<Track> {
-    const res = await api.put<{ data: Track }>(`/tracks/${id}`, {
-        title,
-        artist,
-        album,
-        genres,
-        coverImage,
-    });
-    return res.data.data;
+    coverImage?: string,
+): Promise<Result<Track, Error>> {
+    try {
+        const res = await api.put(`/tracks/${id}`, {
+            title,
+            artist,
+            album,
+            genres,
+            coverImage,
+        });
+        return ok(trackSchema.parse(res.data.data));
+    } catch (e) {
+        return err(e instanceof Error ? e : new Error("Unknown error"));
+    }
 }
 
 export async function createTrack(
@@ -70,42 +53,68 @@ export async function createTrack(
     artist: string,
     album?: string,
     genres?: string[],
-    coverImage?: string
-): Promise<Track> {
-    const res = await api.post<{ data: Track }>("/tracks", {
-        title,
-        artist,
-        album,
-        genres,
-        coverImage,
-    });
-    return res.data.data;
+    coverImage?: string,
+): Promise<Result<Track, Error>> {
+    try {
+        const res = await api.post("/tracks", {
+            title,
+            artist,
+            album,
+            genres,
+            coverImage,
+        });
+        return ok(trackSchema.parse(res.data.data));
+    } catch (e) {
+        return err(e instanceof Error ? e : new Error("Unknown error"));
+    }
 }
 
-export async function deleteTrack(id: string): Promise<Track> {
-    const res = await api.delete<{ data: Track }>(`/tracks/${id}`);
-    return res.data.data;
+export async function deleteTrack(id: string): Promise<Result<Track, Error>> {
+    try {
+        const res = await api.delete(`/tracks/${id}`);
+        return ok(trackSchema.parse(res.data.data));
+    } catch (e) {
+        return err(e instanceof Error ? e : new Error("Unknown error"));
+    }
 }
 
-export async function uploadTrack(id: string, file: File): Promise<Track> {
-    const formData = new FormData();
-    formData.append("file", file);
+export async function uploadTrackFile(
+    id: string,
+    file: File,
+): Promise<Result<Track, Error>> {
+    try {
+        const formData = new FormData();
+        formData.append("file", file);
 
-    const res = await api.post<{ data: Track }>(`/tracks/${id}/upload`, formData, {
-        headers: {
-            "Content-Type": "multipart/form-data",
-        },
-    });
-    return res.data.data;
+        const res = await api.post(`/tracks/${id}/upload`, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return ok(trackSchema.parse(res.data.data));
+    } catch (e) {
+        return err(e instanceof Error ? e : new Error("Unknown error"));
+    }
 }
 
-export async function deleteTrackFile(id: string): Promise<Track> {
-    const res = await api.delete<{ data: Track }>(`/tracks/${id}/file`);
-    return res.data.data;
+export async function deleteTrackFile(
+    id: string,
+): Promise<Result<Track, Error>> {
+    try {
+        const res = await api.delete(`/tracks/${id}/file`);
+        return ok(trackSchema.parse(res.data.data));
+    } catch (e) {
+        return err(e instanceof Error ? e : new Error("Unknown error"));
+    }
 }
 
-export async function deleteTracks(ids: string[]) {
-    await api.post("/tracks/delete", {
-        ids,
-    });
+export async function deleteTracks(
+    ids: string[],
+): Promise<Result<void, Error>> {
+    try {
+        await api.post("/tracks/delete", { ids });
+        return ok(undefined);
+    } catch (e) {
+        return err(e instanceof Error ? e : new Error("Unknown error"));
+    }
 }

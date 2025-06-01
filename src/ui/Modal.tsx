@@ -10,8 +10,15 @@ type Props = {
     children: ReactNode;
 };
 
-export default function Modal({ isOpened, onClose, title, name, children }: Props) {
-    const modalRoot = document.getElementById("modals")!;
+export default function Modal({
+    isOpened,
+    onClose,
+    title,
+    name,
+    children,
+}: Props) {
+    const modalRoot = document.getElementById("modals");
+    if (!modalRoot) return null;
 
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
@@ -38,13 +45,17 @@ export default function Modal({ isOpened, onClose, title, name, children }: Prop
             >
                 <div className="flex justify-between items-center mb-4 border-b pb-2 font-extrabold text-gray-500 ">
                     <div>{title}</div>
-                    <button onClick={onClose} className="absolute top-1 right-1 text-xxl" aria-label="Close modal">
+                    <button
+                        onClick={onClose}
+                        className="absolute top-1 right-1 text-xxl"
+                        aria-label="Close modal"
+                    >
                         <CloseIcon className="w-7 h-7 [&>*]:fill-gray-700" />
                     </button>
                 </div>
                 {children}
             </div>
         </div>,
-        modalRoot
+        modalRoot,
     );
 }

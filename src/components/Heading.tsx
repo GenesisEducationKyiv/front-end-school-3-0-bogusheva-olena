@@ -1,4 +1,10 @@
-import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
+import {
+    ChangeEvent,
+    Dispatch,
+    SetStateAction,
+    useEffect,
+    useState,
+} from "react";
 
 import { FilterOptions } from "../types";
 import { capitalize } from "../utils/utils";
@@ -18,14 +24,25 @@ interface FiltersProps {
     setTotalPages: Dispatch<SetStateAction<number>>;
 }
 
-export default function Heading({ filters, setFilters, setPage, setTotalPages }: FiltersProps) {
-    const [debouncedSearch, setDebouncedSearch] = useState(filters.search || "");
+export default function Heading({
+    filters,
+    setFilters,
+    setPage,
+    setTotalPages,
+}: FiltersProps) {
+    const [debouncedSearch, setDebouncedSearch] = useState(
+        filters.search || "",
+    );
     const [showSuggestions, setShowSuggestions] = useState(false);
 
     const { selectedToDeleteTracks } = useDeleteTracks();
     const { genres, isLoadingGenres } = useGenres();
     const { isLoadingTracks } = useTrackList();
-    const { openModal: openCreateModal, closeModal: closeCreateModal, isModalOpened: isCreateModalOpened } = useModal();
+    const {
+        openModal: openCreateModal,
+        closeModal: closeCreateModal,
+        isModalOpened: isCreateModalOpened,
+    } = useModal();
     const {
         openModal: openDeleteTracksModal,
         closeModal: closeDeleteTracksModal,
@@ -34,7 +51,7 @@ export default function Heading({ filters, setFilters, setPage, setTotalPages }:
 
     const sortByOptions = ["title", "artist", "album", "createdAt"];
     const sortOrderOptions = ["asc", "desc"];
-    const OptionsMapping: Record<string, string> = {
+    const optionsMapping: Record<string, string> = {
         title: "Title",
         artist: "Artist",
         album: "Album",
@@ -57,14 +74,20 @@ export default function Heading({ filters, setFilters, setPage, setTotalPages }:
     }, [debouncedSearch, filters.search, setFilters]);
 
     const matchingGenres =
-        filters.genre.length > 0 ? genres.filter((g) => g.toLowerCase().startsWith(filters.genre.toLowerCase())) : [];
+        filters.genre.length > 0
+            ? genres.filter((g) =>
+                  g.toLowerCase().startsWith(filters.genre.toLowerCase()),
+              )
+            : [];
 
     const handleGenreSelect = (genre: string) => {
         setFilters((prev) => ({ ...prev, genre }));
         setShowSuggestions(false);
     };
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (
+        e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    ) => {
         const { name, value } = e.target;
         if (name === "search") {
             setDebouncedSearch(value);
@@ -90,7 +113,7 @@ export default function Heading({ filters, setFilters, setPage, setTotalPages }:
                     >
                         {sortByOptions.map((option) => (
                             <option key={option} value={option}>
-                                {OptionsMapping[option]}
+                                {optionsMapping[option]}
                             </option>
                         ))}
                     </select>
@@ -103,7 +126,7 @@ export default function Heading({ filters, setFilters, setPage, setTotalPages }:
                     >
                         {sortOrderOptions.map((option) => (
                             <option key={option} value={option}>
-                                {OptionsMapping[option]}
+                                {optionsMapping[option]}
                             </option>
                         ))}
                     </select>
@@ -111,7 +134,9 @@ export default function Heading({ filters, setFilters, setPage, setTotalPages }:
                         className="bg-red-600 w-full text-white px-2 py-1 rounded hover:bg-red-700 disabled:bg-gray-400"
                         type="button"
                         onClick={openDeleteTracksModal}
-                        disabled={isLoadingTracks || !selectedToDeleteTracks.length}
+                        disabled={
+                            isLoadingTracks || !selectedToDeleteTracks.length
+                        }
                         aria-disabled={isLoadingTracks}
                         data-loading={isLoadingTracks || undefined}
                         data-testid="delete-tracks-button"
@@ -152,7 +177,9 @@ export default function Heading({ filters, setFilters, setPage, setTotalPages }:
                                 setShowSuggestions(true);
                             }}
                             onFocus={() => setShowSuggestions(true)}
-                            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                            onBlur={() =>
+                                setTimeout(() => setShowSuggestions(false), 150)
+                            }
                             className="border p-1 rounded w-full"
                             data-testid="filter-genre"
                             disabled={isLoadingTracks || isLoadingGenres}
@@ -163,7 +190,9 @@ export default function Heading({ filters, setFilters, setPage, setTotalPages }:
                                     <li
                                         key={genre}
                                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                        onMouseDown={() => handleGenreSelect(genre)}
+                                        onMouseDown={() =>
+                                            handleGenreSelect(genre)
+                                        }
                                     >
                                         {genre}
                                     </li>
@@ -183,7 +212,10 @@ export default function Heading({ filters, setFilters, setPage, setTotalPages }:
                     />
                 </div>
             </div>
-            <CreateTrackModal isModalOpened={isCreateModalOpened} closeModal={closeCreateModal} />
+            <CreateTrackModal
+                isModalOpened={isCreateModalOpened}
+                closeModal={closeCreateModal}
+            />
             <DeleteTracksModal
                 isModalOpened={isDeleteTracksModalOpened}
                 closeModal={closeDeleteTracksModal}

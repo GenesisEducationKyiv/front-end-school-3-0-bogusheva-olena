@@ -16,17 +16,25 @@ interface Props {
     setTotalPages: Dispatch<SetStateAction<number>>;
 }
 
-export default function DeleteTracksModal({ isModalOpened, closeModal, setPage, setTotalPages }: Props) {
+export default function DeleteTracksModal({
+    isModalOpened,
+    closeModal,
+    setPage,
+    setTotalPages,
+}: Props) {
     const [isLoading, setIsLoading] = useState(false);
     const [mode, setMode] = useState<"selected" | "all">("selected");
 
-    const { updateTrackList, setTracks, allTracksIds, isLoadingAllTracks } = useTrackList();
-    const { selectedToDeleteTracks, setSelectedToDeleteTracks } = useDeleteTracks();
+    const { updateTrackList, setTracks, allTracksIds, isLoadingAllTracks } =
+        useTrackList();
+    const { selectedToDeleteTracks, setSelectedToDeleteTracks } =
+        useDeleteTracks();
     const { showToast } = useToast();
 
     const handleDelete = () => {
         setIsLoading(true);
-        const tracksToDelete = mode === "selected" ? selectedToDeleteTracks : allTracksIds;
+        const tracksToDelete =
+            mode === "selected" ? selectedToDeleteTracks : allTracksIds;
         if (mode === "all") {
             setTracks([]);
             setPage(1);
@@ -34,16 +42,23 @@ export default function DeleteTracksModal({ isModalOpened, closeModal, setPage, 
         }
 
         deleteTracks(tracksToDelete)
-            .then(() => {
-                showToast("Tracks deleted successfully!", "success");
-                updateTrackList();
-                setSelectedToDeleteTracks([]);
-                closeModal();
-            })
-            .catch((error) => {
-                showToast("Failed to delete the tracks. Please try again.", "error");
-                console.error("Error deleting tracks:", error);
-                if (mode === "all") updateTrackList();
+            .then((res) => {
+                res.match(
+                    (_) => {
+                        showToast("Tracks deleted successfully!", "success");
+                        updateTrackList();
+                        setSelectedToDeleteTracks([]);
+                        closeModal();
+                    },
+                    (error) => {
+                        showToast(
+                            "Failed to delete the tracks. Please try again.",
+                            "error",
+                        );
+                        console.error("Error deleting tracks:", error);
+                        if (mode === "all") updateTrackList();
+                    },
+                );
             })
             .finally(() => {
                 setIsLoading(false);
@@ -57,8 +72,11 @@ export default function DeleteTracksModal({ isModalOpened, closeModal, setPage, 
     };
 
     const toggleMode = () => setMode(mode === "selected" ? "all" : "selected");
-    const isDisabled =
-        isLoading || mode === "selected" ? !allTracksIds.length || isLoadingAllTracks : !selectedToDeleteTracks.length;
+    const isDisabled = isLoading
+        ? true
+        : mode === "selected"
+          ? !allTracksIds.length || isLoadingAllTracks
+          : !selectedToDeleteTracks.length;
 
     return (
         <Modal
@@ -82,7 +100,9 @@ export default function DeleteTracksModal({ isModalOpened, closeModal, setPage, 
                     data-testid="select-mode-toggle"
                     className="text-sm text-red-500 underline font-extrabold disabled:text-gray-400"
                 >
-                    {mode === "selected" ? "Delete all tracks?" : "Delete selected tracks?"}
+                    {mode === "selected"
+                        ? "Delete all tracks?"
+                        : "Delete selected tracks?"}
                 </button>
             </div>
             <div className="flex gap-x-2">

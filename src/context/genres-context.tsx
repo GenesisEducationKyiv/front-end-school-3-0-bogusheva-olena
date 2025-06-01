@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import {
+    createContext,
+    useContext,
+    useState,
+    ReactNode,
+    useEffect,
+} from "react";
 import { getGenres } from "../api/genres";
 
 interface GenresContextType {
@@ -15,9 +21,15 @@ export const GenresProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         setIsLoadingGenres(true);
         getGenres()
-            .then(setAllGenres)
-            .catch((error) => {
-                console.error("Failed to load genres:", error);
+            .then((res) => {
+                res.match(
+                    (res) => {
+                        setAllGenres(res);
+                    },
+                    (error) => {
+                        console.error("Failed to load genres:", error);
+                    },
+                );
             })
             .finally(() => {
                 setIsLoadingGenres(false);
@@ -38,6 +50,7 @@ export const GenresProvider = ({ children }: { children: ReactNode }) => {
 
 export const useGenres = () => {
     const context = useContext(GenresContext);
-    if (!context) throw new Error("useGenres must be used within GenreProvider");
+    if (!context)
+        throw new Error("useGenres must be used within GenreProvider");
     return context;
 };
