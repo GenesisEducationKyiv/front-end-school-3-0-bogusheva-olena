@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
 
 import { FilterOptions } from "../types";
+import { TOAST_MESSAGES } from "../constants";
 import { getTracks } from "../api/tracks";
 import { buildQueryParams } from "../utils/utils";
 
@@ -50,10 +51,7 @@ export default function TracksList({
                         },
                         (error) => {
                             console.error("Error fetching tracks:", error);
-                            showToast(
-                                "Failed to fetch tracks. Please try again.",
-                                "error",
-                            );
+                            showToast(TOAST_MESSAGES.FETCH_FAIL, "error");
                         },
                     );
                 })

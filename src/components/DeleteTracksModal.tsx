@@ -5,6 +5,8 @@ import { deleteTracks } from "../api/tracks";
 import { useTrackList } from "../context/track-list-context";
 import { useDeleteTracks } from "../context/delete-tracks-context";
 import { useToast } from "../hooks/useToast";
+import { TRACK_DELETE_MODE, TrackDeleteMode } from "../types";
+import { TOAST_MESSAGES } from "../constants";
 
 import Loader from "../ui/Loader";
 import Modal from "../ui/Modal";
@@ -23,7 +25,12 @@ export default function DeleteTracksModal({
     setTotalPages,
 }: Props) {
     const [isLoading, setIsLoading] = useState(false);
-    const [mode, setMode] = useState<"selected" | "all">("selected");
+    const [mode, setMode] = useState<TrackDeleteMode>(
+        TRACK_DELETE_MODE.SELECTED
+    );
+
+    const isSelectedMode = mode === TRACK_DELETE_MODE.SELECTED;
+    const isAllMode = mode === TRACK_DELETE_MODE.ALL;
 
     const { updateTrackList, setTracks, allTracksIds, isLoadingAllTracks } =
         useTrackList();
@@ -33,9 +40,10 @@ export default function DeleteTracksModal({
 
     const handleDelete = () => {
         setIsLoading(true);
-        const tracksToDelete =
-            mode === "selected" ? selectedToDeleteTracks : allTracksIds;
-        if (mode === "all") {
+        const tracksToDelete = isSelectedMode
+            ? selectedToDeleteTracks
+            : allTracksIds;
+        if (isAllMode) {
             setTracks([]);
             setPage(1);
             setTotalPages(0);
@@ -45,18 +53,18 @@ export default function DeleteTracksModal({
             .then((res) => {
                 res.match(
                     (_) => {
-                        showToast("Tracks deleted successfully!", "success");
+                        showToast(
+                            TOAST_MESSAGES.MULTIDELETE_SUCCESS,
+                            "success"
+                        );
                         updateTrackList();
                         setSelectedToDeleteTracks([]);
                         closeModal();
                     },
                     (error) => {
-                        showToast(
-                            "Failed to delete the tracks. Please try again.",
-                            "error",
-                        );
+                        showToast(TOAST_MESSAGES.MULTIDELETE_FAIL, "error");
                         console.error("Error deleting tracks:", error);
-                        if (mode === "all") updateTrackList();
+                        if (isAllMode) updateTrackList();
                     },
                 );
             })
@@ -67,16 +75,19 @@ export default function DeleteTracksModal({
 
     const handleClearSelected = () => {
         setSelectedToDeleteTracks([]);
-        setMode("selected");
+        setMode(TRACK_DELETE_MODE.SELECTED);
         closeModal();
     };
 
-    const toggleMode = () => setMode(mode === "selected" ? "all" : "selected");
+    const toggleMode = () =>
+        setMode(
+            isSelectedMode ? TRACK_DELETE_MODE.ALL : TRACK_DELETE_MODE.SELECTED
+        );
     const isDisabled = isLoading
         ? true
-        : mode === "selected"
-          ? !allTracksIds.length || isLoadingAllTracks
-          : !selectedToDeleteTracks.length;
+        : isSelectedMode
+        ? !allTracksIds.length || isLoadingAllTracks
+        : !selectedToDeleteTracks.length;
 
     return (
         <Modal
@@ -88,7 +99,7 @@ export default function DeleteTracksModal({
             <div className="mb-2">
                 <p>This action cannot be undone.</p>
                 <p>{`Please confirm that you want to delete ${
-                    mode === "selected" ? "the selected" : "all"
+                    isSelectedMode ? "the selected" : "all"
                 } tracks.`}</p>
             </div>
             <div className="mb-2 text-end">
@@ -100,7 +111,7 @@ export default function DeleteTracksModal({
                     data-testid="select-mode-toggle"
                     className="text-sm text-red-500 underline font-extrabold disabled:text-gray-400"
                 >
-                    {mode === "selected"
+                    {isSelectedMode
                         ? "Delete all tracks?"
                         : "Delete selected tracks?"}
                 </button>

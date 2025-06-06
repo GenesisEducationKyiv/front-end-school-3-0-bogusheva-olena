@@ -22,3 +22,10 @@ export type GetTracksParams = {
 export type Track = z.infer<typeof trackSchema>;
 
 export type TrackFormValues = z.infer<typeof trackFormSchema>;
+
+export const TRACK_DELETE_MODE = {
+  SELECTED: "selected",
+  ALL: "all",
+} as const;
+
+export type TrackDeleteMode = (typeof TRACK_DELETE_MODE)[keyof typeof TRACK_DELETE_MODE];

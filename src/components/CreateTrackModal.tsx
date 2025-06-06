@@ -7,6 +7,7 @@ import { createTrack } from "../api/tracks";
 import { FormikHelpers } from "formik";
 import { useGenres } from "../context/genres-context";
 import { TrackFormValues } from "../types";
+import { TOAST_MESSAGES } from "../constants";
 
 interface Props {
     isModalOpened: boolean;
@@ -36,16 +37,13 @@ export default function CreateTrackModal({ isModalOpened, closeModal }: Props) {
             .then((res) => {
                 res.match(
                     (_) => {
-                        showToast("Track created successfully!", "success");
+                        showToast(TOAST_MESSAGES.CREATE_SUCCESS, "success");
                         updateTrackList();
                         resetForm();
                         closeModal();
                     },
                     (error) => {
-                        showToast(
-                            "Failed to create track. Please try again.",
-                            "error",
-                        );
+                        showToast(TOAST_MESSAGES.CREATE_FAIL, "error");
                         console.error("Error creating track:", error);
                     },
                 );

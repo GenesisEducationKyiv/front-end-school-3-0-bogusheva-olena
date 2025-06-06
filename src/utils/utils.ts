@@ -40,3 +40,7 @@ export function lockScroll(isLocked: boolean): void {
         html.style.overflow = isLocked ? "hidden" : "";
     }
 }
+
+export function normalizeError(e: unknown): Error {
+    return e instanceof Error ? e : new Error("Unknown error");
+}

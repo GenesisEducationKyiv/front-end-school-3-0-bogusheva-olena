@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { Track, TrackFormValues } from "../types";
+import { TOAST_MESSAGES } from "../constants";
 import { updateTrack } from "../api/tracks";
 
 import { useTrackList } from "../context/track-list-context";
@@ -47,14 +48,11 @@ export default function EditTrackModal({
             .then((res) => {
                 res.match(
                     (_) => {
-                        showToast("Track updated successfully!", "success");
+                        showToast(TOAST_MESSAGES.UPDATE_SUCCESS, "success");
                         closeModal();
                     },
                     (error) => {
-                        showToast(
-                            "Failed to update track. Please try again.",
-                            "error",
-                        );
+                        showToast(TOAST_MESSAGES.UPDATE_FAIL, "error");
                         updateTrackInList(prevTrack);
                         console.error("Error updating track:", error);
                     },

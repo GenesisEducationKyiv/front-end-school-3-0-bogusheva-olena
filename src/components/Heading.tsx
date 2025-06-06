@@ -8,14 +8,19 @@ import {
 
 import { FilterOptions } from "../types";
 import { capitalize } from "../utils/utils";
-
+import { useGenres } from "../context/genres-context";
 import { useDeleteTracks } from "../context/delete-tracks-context";
 import { useTrackList } from "../context/track-list-context";
 import { useModal } from "../hooks/useModal";
 
 import CreateTrackModal from "./CreateTrackModal";
 import DeleteTracksModal from "./DeleteTracksModal";
-import { useGenres } from "../context/genres-context";
+import {
+    FILTER_LABELS,
+    SEARCH_DEBOUNCE_MS,
+    SORT_BY_OPTIONS,
+    SORT_ORDER_OPTIONS,
+} from "../constants";
 
 interface FiltersProps {
     filters: FilterOptions;
@@ -49,17 +54,6 @@ export default function Heading({
         isModalOpened: isDeleteTracksModalOpened,
     } = useModal();
 
-    const sortByOptions = ["title", "artist", "album", "createdAt"];
-    const sortOrderOptions = ["asc", "desc"];
-    const optionsMapping: Record<string, string> = {
-        title: "Title",
-        artist: "Artist",
-        album: "Album",
-        createdAt: "Date",
-        asc: "↑ Ascending",
-        desc: "↓ Descending",
-    };
-
     useEffect(() => {
         const timeout = setTimeout(() => {
             if (debouncedSearch !== filters.search) {
@@ -68,7 +62,7 @@ export default function Heading({
                     search: debouncedSearch,
                 }));
             }
-        }, 500);
+        }, SEARCH_DEBOUNCE_MS);
 
         return () => clearTimeout(timeout);
     }, [debouncedSearch, filters.search, setFilters]);
@@ -111,9 +105,9 @@ export default function Heading({
                         data-testid="sort-select"
                         disabled={isLoadingTracks}
                     >
-                        {sortByOptions.map((option) => (
+                        {SORT_BY_OPTIONS.map((option) => (
                             <option key={option} value={option}>
-                                {optionsMapping[option]}
+                                {FILTER_LABELS[option]}
                             </option>
                         ))}
                     </select>
@@ -124,9 +118,9 @@ export default function Heading({
                         className="border p-1 rounded w-full"
                         disabled={isLoadingTracks}
                     >
-                        {sortOrderOptions.map((option) => (
+                        {SORT_ORDER_OPTIONS.map((option) => (
                             <option key={option} value={option}>
-                                {optionsMapping[option]}
+                                {FILTER_LABELS[option]}
                             </option>
                         ))}
                     </select>

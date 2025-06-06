@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { deleteTrack } from "../api/tracks";
 import { Track } from "../types";
-
+import { TOAST_MESSAGES } from "../constants";
 import { useTrackList } from "../context/track-list-context";
 import { useDeleteTracks } from "../context/delete-tracks-context";
 import { useToast } from "../hooks/useToast";
@@ -36,17 +36,14 @@ export default function DeleteTrackModal({
             .then((res) => {
                 res.match(
                     (_) => {
-                        showToast("Track deleted successfully!", "success");
+                        showToast(TOAST_MESSAGES.DELETE_SUCCESS, "success");
                         setSelectedToDeleteTracks((prev) =>
-                            prev.filter((id) => id !== track.id),
+                            prev.filter((id) => id !== track.id)
                         );
                         closeModal();
                     },
                     (error) => {
-                        showToast(
-                            "Failed to delete the track. Please try again.",
-                            "error",
-                        );
+                        showToast(TOAST_MESSAGES.DELETE_FAIL, "error");
                         console.error("Error deleting track:", error);
                     },
                 );

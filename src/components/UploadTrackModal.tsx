@@ -8,7 +8,13 @@ import { useToast } from "../hooks/useToast";
 
 import Loader from "../ui/Loader";
 import Modal from "../ui/Modal";
-import { PATH } from "../constants";
+import {
+    FILE_ERRORS,
+    FILE_MAX_SIZE,
+    FILE_PATH,
+    TOAST_MESSAGES,
+    VALID_FILE_TYPE,
+} from "../constants";
 
 interface Props {
     isModalOpened: boolean;
@@ -32,13 +38,10 @@ export default function UploadTrackModal({
         const selectedFile = e.target.files?.[0];
         if (!selectedFile) return;
 
-        const validTypes = ["audio/mpeg", "audio/wav", "audio/mp3"];
-        const maxSize = 10 * 1024 * 1024;
-
-        if (!validTypes.includes(selectedFile.type)) {
-            setError("Only MP3 or WAV files are allowed.");
-        } else if (selectedFile.size > maxSize) {
-            setError("File size must be less than 10MB.");
+        if (!VALID_FILE_TYPE.includes(selectedFile.type)) {
+            setError(FILE_ERRORS.INVALID_TYPE);
+        } else if (selectedFile.size > FILE_MAX_SIZE) {
+            setError(FILE_ERRORS.TOO_LARGE);
         } else {
             setError("");
             setFile(selectedFile);
@@ -54,15 +57,15 @@ export default function UploadTrackModal({
             .then((res) => {
                 res.match(
                     () => {
-                        showToast("Track uploaded successfully!", "success");
+                        showToast(
+                            TOAST_MESSAGES.UPLOAD_FILE_SUCCESS,
+                            "success"
+                        );
                         updateTrackList();
                         closeModal();
                     },
                     (error) => {
-                        showToast(
-                            "Failed to upload the track. Please try again.",
-                            "error",
-                        );
+                        showToast(TOAST_MESSAGES.UPLOAD_FILE_FAIL, "error");
                         console.error("Error uploading track:", error);
                     },
                 );
@@ -84,16 +87,13 @@ export default function UploadTrackModal({
                 res.match(
                     () => {
                         showToast(
-                            "Track file deleted successfully!",
-                            "success",
+                            TOAST_MESSAGES.DELETE_FILE_SUCCESS,
+                            "success"
                         );
                         closeModal();
                     },
                     (error) => {
-                        showToast(
-                            "Failed to delete the track file. Please try again.",
-                            "error",
-                        );
+                        showToast(TOAST_MESSAGES.DELETE_FILE_FAIL, "error");
                         updateTrackInList(originalTrack);
                         console.error("Error deleting track file:", error);
                     },
@@ -124,7 +124,7 @@ export default function UploadTrackModal({
                     <div>
                         <audio
                             controls
-                            src={`${PATH}${track.audioFile}`}
+                            src={`${FILE_PATH}${track.audioFile}`}
                             className="w-full mt-2"
                         />
                     </div>

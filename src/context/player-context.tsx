@@ -7,7 +7,7 @@ import {
     ReactNode,
 } from "react";
 import { Track } from "../types";
-import { PATH } from "../constants";
+import { FILE_PATH } from "../constants";
 
 interface AudioPlayerContextType {
     playTrack: (track: Track) => void;
@@ -69,7 +69,7 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
         const isSameTrack = currentTrackId === track.id;
 
         if (!isSameTrack) {
-            audio.src = `${PATH}${track.audioFile}`;
+            audio.src = `${FILE_PATH}${track.audioFile}`;
             audio.currentTime = 0;
             setProgress(0);
         }
