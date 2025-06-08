@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { R, pipe } from "@mobily/ts-belt";
 
 import { Track, TrackFormValues } from "../types";
 import { TOAST_MESSAGES } from "../constants";
@@ -55,33 +56,32 @@ export default function EditTrackModal({
 
         updateTrackInList(updatedTrack);
 
-        updateTrack(
+        void updateTrack(
             track.id,
             values.title,
             values.artist,
             values.album ?? "",
             values.genres,
-            values.coverImage ?? "",
-        )
-            .then((res) => {
-                res.match(
-                    (_) => {
-                        showToast(TOAST_MESSAGES.UPDATE_SUCCESS, "success");
-                        if (hasChanges && doesNotMatchFilters) {
-                            resetAllQueryParams();
-                        }
-                        closeModal();
-                    },
-                    (error) => {
-                        showToast(TOAST_MESSAGES.UPDATE_FAIL, "error");
-                        updateTrackInList(prevTrack);
-                        console.error("Error updating track:", error);
-                    },
-                );
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+            values.coverImage ?? ""
+        ).then((res) => {
+            pipe(
+                res,
+                R.tap((_) => {
+                    showToast(TOAST_MESSAGES.UPDATE_SUCCESS, "success");
+                    if (hasChanges && doesNotMatchFilters) {
+                        resetAllQueryParams();
+                    }
+                    closeModal();
+                }),
+                R.tapError((err) => {
+                    showToast(TOAST_MESSAGES.UPDATE_FAIL, "error");
+                    updateTrackInList(prevTrack);
+                    console.error("Error updating track:", err);
+                })
+            );
+        });
+
+        setIsLoading(false);
     };
 
     return (

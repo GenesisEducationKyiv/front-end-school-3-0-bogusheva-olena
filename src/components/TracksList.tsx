@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
-
+import { R, pipe } from "@mobily/ts-belt";
 import { TOAST_MESSAGES } from "../constants";
 import { getTracks } from "../api/tracks";
 
@@ -35,20 +35,21 @@ export default function TracksList({ totalPages, setTotalPages }: Props) {
         () => {
             setIsLoadingTracks(true);
 
-            getTracks(requestTracksParams)
-                .then((res) => {
-                    res.match(
-                        (res) => {
-                            setTracks(res.data);
-                            setTotalPages(res.meta.totalPages);
-                        },
-                        (error) => {
-                            console.error("Error fetching tracks:", error);
-                            showToast(TOAST_MESSAGES.FETCH_FAIL, "error");
-                        },
-                    );
-                })
-                .finally(() => setIsLoadingTracks(false));
+            void getTracks(requestTracksParams).then((res) => {
+                pipe(
+                    res,
+                    R.tap((res) => {
+                        setTracks(res.data);
+                        setTotalPages(res.meta.totalPages);
+                    }),
+                    R.tapError((err) => {
+                        console.error("Error fetching tracks:", err);
+                        showToast(TOAST_MESSAGES.FETCH_FAIL, "error");
+                    })
+                );
+            });
+
+            setIsLoadingTracks(false);
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [filters, updateCounter]

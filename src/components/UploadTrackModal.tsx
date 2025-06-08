@@ -1,5 +1,5 @@
 import { ChangeEvent, useState } from "react";
-
+import { R, pipe } from "@mobily/ts-belt";
 import { Track } from "../types";
 import { deleteTrackFile, uploadTrackFile } from "../api/tracks";
 
@@ -53,26 +53,22 @@ export default function UploadTrackModal({
 
         setIsLoading(true);
 
-        uploadTrackFile(track.id, file)
-            .then((res) => {
-                res.match(
-                    () => {
-                        showToast(
-                            TOAST_MESSAGES.UPLOAD_FILE_SUCCESS,
-                            "success"
-                        );
-                        updateTrackList();
-                        closeModal();
-                    },
-                    (error) => {
-                        showToast(TOAST_MESSAGES.UPLOAD_FILE_FAIL, "error");
-                        console.error("Error uploading track:", error);
-                    },
-                );
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        void uploadTrackFile(track.id, file).then((res) => {
+            pipe(
+                res,
+                R.tap((_) => {
+                    showToast(TOAST_MESSAGES.UPLOAD_FILE_SUCCESS, "success");
+                    updateTrackList();
+                    closeModal();
+                }),
+                R.tapError((err) => {
+                    showToast(TOAST_MESSAGES.UPLOAD_FILE_FAIL, "error");
+                    console.error("Error uploading track:", err);
+                })
+            );
+        });
+
+        setIsLoading(false);
     };
 
     const originalTrack = { ...track };
@@ -82,26 +78,22 @@ export default function UploadTrackModal({
 
         updateTrackInList({ ...track, audioFile: null });
 
-        deleteTrackFile(track.id)
-            .then((res) => {
-                res.match(
-                    () => {
-                        showToast(
-                            TOAST_MESSAGES.DELETE_FILE_SUCCESS,
-                            "success"
-                        );
-                        closeModal();
-                    },
-                    (error) => {
-                        showToast(TOAST_MESSAGES.DELETE_FILE_FAIL, "error");
-                        updateTrackInList(originalTrack);
-                        console.error("Error deleting track file:", error);
-                    },
-                );
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        void deleteTrackFile(track.id).then((res) => {
+            pipe(
+                res,
+                R.tap((_) => {
+                    showToast(TOAST_MESSAGES.DELETE_FILE_SUCCESS, "success");
+                    closeModal();
+                }),
+                R.tapError((err) => {
+                    showToast(TOAST_MESSAGES.DELETE_FILE_FAIL, "error");
+                    updateTrackInList(originalTrack);
+                    console.error("Error deleting track file:", err);
+                })
+            );
+        });
+
+        setIsLoading(false);
     };
 
     return (

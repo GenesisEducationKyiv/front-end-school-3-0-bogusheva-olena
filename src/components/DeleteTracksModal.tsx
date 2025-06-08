@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react";
-
+import { R, pipe } from "@mobily/ts-belt";
 import { deleteTracks } from "../api/tracks";
 
 import { useTrackList } from "../context/track-list-context";
@@ -46,35 +46,31 @@ export default function DeleteTracksModal({
             ? selectedToDeleteTracks
             : allTracksIds;
 
-        deleteTracks(tracksToDelete)
-            .then((res) => {
-                res.match(
-                    (_) => {
-                        showToast(
-                            TOAST_MESSAGES.MULTIDELETE_SUCCESS,
-                            "success"
-                        );
-                        if (isAllMode) {
-                            setTracks([]);
-                            resetAllQueryParams();
-                            setTotalPages(0);
-                        } else {
-                            updateTrackList();
-                            updateQueryParam("page", "1", { resetPage: false });
-                        }
-                        setSelectedToDeleteTracks([]);
-                        closeModal();
-                    },
-                    (error) => {
-                        showToast(TOAST_MESSAGES.MULTIDELETE_FAIL, "error");
-                        console.error("Error deleting tracks:", error);
-                        if (isAllMode) updateTrackList();
-                    },
-                );
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        void deleteTracks(tracksToDelete).then((res) => {
+            pipe(
+                res,
+                R.tap((_) => {
+                    showToast(TOAST_MESSAGES.MULTIDELETE_SUCCESS, "success");
+                    if (isAllMode) {
+                        setTracks([]);
+                        resetAllQueryParams();
+                        setTotalPages(0);
+                    } else {
+                        updateTrackList();
+                        updateQueryParam("page", "1", { resetPage: false });
+                    }
+                    setSelectedToDeleteTracks([]);
+                    closeModal();
+                }),
+                R.tapError((err) => {
+                    showToast(TOAST_MESSAGES.MULTIDELETE_FAIL, "error");
+                    console.error("Error deleting tracks:", err);
+                    if (isAllMode) updateTrackList();
+                })
+            );
+        });
+
+        setIsLoading(false);
     };
 
     const handleClearSelected = () => {

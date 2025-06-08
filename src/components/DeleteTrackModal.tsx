@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import { R, pipe } from "@mobily/ts-belt";
 import { deleteTrack } from "../api/tracks";
 import { Track } from "../types";
 import { TOAST_MESSAGES } from "../constants";
@@ -33,28 +33,26 @@ export default function DeleteTrackModal({
 
         removeTrackFromList(track.id);
 
-        deleteTrack(track.id)
-            .then((res) => {
-                res.match(
-                    (_) => {
-                        showToast(TOAST_MESSAGES.DELETE_SUCCESS, "success");
-                        setSelectedToDeleteTracks((prev) =>
-                            prev.filter((id) => id !== track.id)
-                        );
-                        updateQueryParam("page", "1", { resetPage: false });
+        void deleteTrack(track.id).then((res) => {
+            pipe(
+                res,
+                R.tap((_) => {
+                    showToast(TOAST_MESSAGES.DELETE_SUCCESS, "success");
+                    setSelectedToDeleteTracks((prev) =>
+                        prev.filter((id) => id !== track.id)
+                    );
+                    updateQueryParam("page", "1", { resetPage: false });
+                    closeModal();
+                }),
+                R.tapError((err) => {
+                    showToast(TOAST_MESSAGES.DELETE_FAIL, "error");
+                    console.error("Error deleting track:", err);
+                })
+            );
+        });
 
-                        closeModal();
-                    },
-                    (error) => {
-                        showToast(TOAST_MESSAGES.DELETE_FAIL, "error");
-                        console.error("Error deleting track:", error);
-                    },
-                );
-            })
-            .finally(() => {
-                updateTrackList();
-                setIsLoading(false);
-            });
+        updateTrackList();
+        setIsLoading(false);
     };
 
     return (
