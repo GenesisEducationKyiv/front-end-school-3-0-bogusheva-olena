@@ -10,7 +10,10 @@ export default function WaveVisualizer({ track }: Props) {
     const isCurrent = currentTrackId === track.id;
 
     return (
-        <div className="relative w-full h-3" data-testid={`audio-player-${track.id}`}>
+        <div
+            className="relative w-full h-3"
+            data-testid={`audio-player-${track.id}`}
+        >
             {isCurrent && isPlaying && (
                 <div
                     className="absolute inset-0 h-3 z-10 overflow-hidden"
@@ -20,18 +23,20 @@ export default function WaveVisualizer({ track }: Props) {
                     }}
                 >
                     <div className="flex items-center gap-[3px] h-full w-full">
-                        {Array.from({ length: progress }).map((_, i) => (
-                            <div
-                                key={i}
-                                className="flex-1 bg-green-600 rounded animate-wave"
-                                style={{
-                                    animationDelay: `${i * 0.1}s`,
-                                    height: isPlaying ? "70%" : "40%",
-                                    transition: "height 0.2s",
-                                    marginInline: "1px",
-                                }}
-                            />
-                        ))}
+                        {Array.from({ length: Math.floor(progress) }).map(
+                            (_, i) => (
+                                <div
+                                    key={i}
+                                    className="flex-1 bg-green-600 rounded animate-wave"
+                                    style={{
+                                        animationDelay: `${i * 0.1}s`,
+                                        height: isPlaying ? "70%" : "40%",
+                                        transition: "height 0.2s",
+                                        marginInline: "1px",
+                                    }}
+                                />
+                            ),
+                        )}
                     </div>
                 </div>
             )}

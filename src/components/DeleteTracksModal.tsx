@@ -5,6 +5,8 @@ import { deleteTracks } from "../api/tracks";
 import { useTrackList } from "../context/track-list-context";
 import { useDeleteTracks } from "../context/delete-tracks-context";
 import { useToast } from "../hooks/useToast";
+import { TRACK_DELETE_MODE, TrackDeleteMode } from "../types";
+import { TOAST_MESSAGES } from "../constants";
 
 import Loader from "../ui/Loader";
 import Modal from "../ui/Modal";
@@ -16,34 +18,55 @@ interface Props {
     setTotalPages: Dispatch<SetStateAction<number>>;
 }
 
-export default function DeleteTracksModal({ isModalOpened, closeModal, setPage, setTotalPages }: Props) {
+export default function DeleteTracksModal({
+    isModalOpened,
+    closeModal,
+    setPage,
+    setTotalPages,
+}: Props) {
     const [isLoading, setIsLoading] = useState(false);
-    const [mode, setMode] = useState<"selected" | "all">("selected");
+    const [mode, setMode] = useState<TrackDeleteMode>(
+        TRACK_DELETE_MODE.SELECTED
+    );
 
-    const { updateTrackList, setTracks, allTracksIds, isLoadingAllTracks } = useTrackList();
-    const { selectedToDeleteTracks, setSelectedToDeleteTracks } = useDeleteTracks();
+    const isSelectedMode = mode === TRACK_DELETE_MODE.SELECTED;
+    const isAllMode = mode === TRACK_DELETE_MODE.ALL;
+
+    const { updateTrackList, setTracks, allTracksIds, isLoadingAllTracks } =
+        useTrackList();
+    const { selectedToDeleteTracks, setSelectedToDeleteTracks } =
+        useDeleteTracks();
     const { showToast } = useToast();
 
     const handleDelete = () => {
         setIsLoading(true);
-        const tracksToDelete = mode === "selected" ? selectedToDeleteTracks : allTracksIds;
-        if (mode === "all") {
+        const tracksToDelete = isSelectedMode
+            ? selectedToDeleteTracks
+            : allTracksIds;
+        if (isAllMode) {
             setTracks([]);
             setPage(1);
             setTotalPages(0);
         }
 
         deleteTracks(tracksToDelete)
-            .then(() => {
-                showToast("Tracks deleted successfully!", "success");
-                updateTrackList();
-                setSelectedToDeleteTracks([]);
-                closeModal();
-            })
-            .catch((error) => {
-                showToast("Failed to delete the tracks. Please try again.", "error");
-                console.error("Error deleting tracks:", error);
-                if (mode === "all") updateTrackList();
+            .then((res) => {
+                res.match(
+                    (_) => {
+                        showToast(
+                            TOAST_MESSAGES.MULTIDELETE_SUCCESS,
+                            "success"
+                        );
+                        updateTrackList();
+                        setSelectedToDeleteTracks([]);
+                        closeModal();
+                    },
+                    (error) => {
+                        showToast(TOAST_MESSAGES.MULTIDELETE_FAIL, "error");
+                        console.error("Error deleting tracks:", error);
+                        if (isAllMode) updateTrackList();
+                    },
+                );
             })
             .finally(() => {
                 setIsLoading(false);
@@ -52,13 +75,19 @@ export default function DeleteTracksModal({ isModalOpened, closeModal, setPage, 
 
     const handleClearSelected = () => {
         setSelectedToDeleteTracks([]);
-        setMode("selected");
+        setMode(TRACK_DELETE_MODE.SELECTED);
         closeModal();
     };
 
-    const toggleMode = () => setMode(mode === "selected" ? "all" : "selected");
-    const isDisabled =
-        isLoading || mode === "selected" ? !allTracksIds.length || isLoadingAllTracks : !selectedToDeleteTracks.length;
+    const toggleMode = () =>
+        setMode(
+            isSelectedMode ? TRACK_DELETE_MODE.ALL : TRACK_DELETE_MODE.SELECTED
+        );
+    const isDisabled = isLoading
+        ? true
+        : isSelectedMode
+        ? !allTracksIds.length || isLoadingAllTracks
+        : !selectedToDeleteTracks.length;
 
     return (
         <Modal
@@ -70,7 +99,7 @@ export default function DeleteTracksModal({ isModalOpened, closeModal, setPage, 
             <div className="mb-2">
                 <p>This action cannot be undone.</p>
                 <p>{`Please confirm that you want to delete ${
-                    mode === "selected" ? "the selected" : "all"
+                    isSelectedMode ? "the selected" : "all"
                 } tracks.`}</p>
             </div>
             <div className="mb-2 text-end">
@@ -82,7 +111,9 @@ export default function DeleteTracksModal({ isModalOpened, closeModal, setPage, 
                     data-testid="select-mode-toggle"
                     className="text-sm text-red-500 underline font-extrabold disabled:text-gray-400"
                 >
-                    {mode === "selected" ? "Delete all tracks?" : "Delete selected tracks?"}
+                    {isSelectedMode
+                        ? "Delete all tracks?"
+                        : "Delete selected tracks?"}
                 </button>
             </div>
             <div className="flex gap-x-2">

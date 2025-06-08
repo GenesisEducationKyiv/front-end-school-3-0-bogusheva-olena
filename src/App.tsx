@@ -5,6 +5,7 @@ import { TrackListProvider } from "./context/track-list-context";
 import { AudioPlayerProvider } from "./context/player-context";
 import { DeleteTracksProvider } from "./context/delete-tracks-context";
 import { GenresProvider } from "./context/genres-context";
+import { ROUTES } from "./constants";
 
 import MusicTracksPage from "./pages/MusicTracksPage";
 
@@ -20,8 +21,16 @@ function App() {
                         <DeleteTracksProvider>
                             <main>
                                 <Routes>
-                                    <Route path="/" element={<Navigate to="/tracks" />} />
-                                    <Route path="/tracks" element={<MusicTracksPage />} />
+                                    <Route
+                                        path="/"
+                                        element={
+                                            <Navigate to={ROUTES.TRACKS} />
+                                        }
+                                    />
+                                    <Route
+                                        path={ROUTES.TRACKS}
+                                        element={<MusicTracksPage />}
+                                    />
                                 </Routes>
                             </main>
                         </DeleteTracksProvider>

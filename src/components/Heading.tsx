@@ -1,15 +1,26 @@
-import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
+import {
+    ChangeEvent,
+    Dispatch,
+    SetStateAction,
+    useEffect,
+    useState,
+} from "react";
 
 import { FilterOptions } from "../types";
 import { capitalize } from "../utils/utils";
-
+import { useGenres } from "../context/genres-context";
 import { useDeleteTracks } from "../context/delete-tracks-context";
 import { useTrackList } from "../context/track-list-context";
 import { useModal } from "../hooks/useModal";
 
 import CreateTrackModal from "./CreateTrackModal";
 import DeleteTracksModal from "./DeleteTracksModal";
-import { useGenres } from "../context/genres-context";
+import {
+    FILTER_LABELS,
+    SEARCH_DEBOUNCE_MS,
+    SORT_BY_OPTIONS,
+    SORT_ORDER_OPTIONS,
+} from "../constants";
 
 interface FiltersProps {
     filters: FilterOptions;
@@ -18,30 +29,30 @@ interface FiltersProps {
     setTotalPages: Dispatch<SetStateAction<number>>;
 }
 
-export default function Heading({ filters, setFilters, setPage, setTotalPages }: FiltersProps) {
-    const [debouncedSearch, setDebouncedSearch] = useState(filters.search || "");
+export default function Heading({
+    filters,
+    setFilters,
+    setPage,
+    setTotalPages,
+}: FiltersProps) {
+    const [debouncedSearch, setDebouncedSearch] = useState(
+        filters.search || "",
+    );
     const [showSuggestions, setShowSuggestions] = useState(false);
 
     const { selectedToDeleteTracks } = useDeleteTracks();
     const { genres, isLoadingGenres } = useGenres();
     const { isLoadingTracks } = useTrackList();
-    const { openModal: openCreateModal, closeModal: closeCreateModal, isModalOpened: isCreateModalOpened } = useModal();
+    const {
+        openModal: openCreateModal,
+        closeModal: closeCreateModal,
+        isModalOpened: isCreateModalOpened,
+    } = useModal();
     const {
         openModal: openDeleteTracksModal,
         closeModal: closeDeleteTracksModal,
         isModalOpened: isDeleteTracksModalOpened,
     } = useModal();
-
-    const sortByOptions = ["title", "artist", "album", "createdAt"];
-    const sortOrderOptions = ["asc", "desc"];
-    const OptionsMapping: Record<string, string> = {
-        title: "Title",
-        artist: "Artist",
-        album: "Album",
-        createdAt: "Date",
-        asc: "↑ Ascending",
-        desc: "↓ Descending",
-    };
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -51,20 +62,26 @@ export default function Heading({ filters, setFilters, setPage, setTotalPages }:
                     search: debouncedSearch,
                 }));
             }
-        }, 500);
+        }, SEARCH_DEBOUNCE_MS);
 
         return () => clearTimeout(timeout);
     }, [debouncedSearch, filters.search, setFilters]);
 
     const matchingGenres =
-        filters.genre.length > 0 ? genres.filter((g) => g.toLowerCase().startsWith(filters.genre.toLowerCase())) : [];
+        filters.genre.length > 0
+            ? genres.filter((g) =>
+                  g.toLowerCase().startsWith(filters.genre.toLowerCase()),
+              )
+            : [];
 
     const handleGenreSelect = (genre: string) => {
         setFilters((prev) => ({ ...prev, genre }));
         setShowSuggestions(false);
     };
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (
+        e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    ) => {
         const { name, value } = e.target;
         if (name === "search") {
             setDebouncedSearch(value);
@@ -88,9 +105,9 @@ export default function Heading({ filters, setFilters, setPage, setTotalPages }:
                         data-testid="sort-select"
                         disabled={isLoadingTracks}
                     >
-                        {sortByOptions.map((option) => (
+                        {SORT_BY_OPTIONS.map((option) => (
                             <option key={option} value={option}>
-                                {OptionsMapping[option]}
+                                {FILTER_LABELS[option]}
                             </option>
                         ))}
                     </select>
@@ -101,9 +118,9 @@ export default function Heading({ filters, setFilters, setPage, setTotalPages }:
                         className="border p-1 rounded w-full"
                         disabled={isLoadingTracks}
                     >
-                        {sortOrderOptions.map((option) => (
+                        {SORT_ORDER_OPTIONS.map((option) => (
                             <option key={option} value={option}>
-                                {OptionsMapping[option]}
+                                {FILTER_LABELS[option]}
                             </option>
                         ))}
                     </select>
@@ -111,7 +128,9 @@ export default function Heading({ filters, setFilters, setPage, setTotalPages }:
                         className="bg-red-600 w-full text-white px-2 py-1 rounded hover:bg-red-700 disabled:bg-gray-400"
                         type="button"
                         onClick={openDeleteTracksModal}
-                        disabled={isLoadingTracks || !selectedToDeleteTracks.length}
+                        disabled={
+                            isLoadingTracks || !selectedToDeleteTracks.length
+                        }
                         aria-disabled={isLoadingTracks}
                         data-loading={isLoadingTracks || undefined}
                         data-testid="delete-tracks-button"
@@ -152,7 +171,9 @@ export default function Heading({ filters, setFilters, setPage, setTotalPages }:
                                 setShowSuggestions(true);
                             }}
                             onFocus={() => setShowSuggestions(true)}
-                            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                            onBlur={() =>
+                                setTimeout(() => setShowSuggestions(false), 150)
+                            }
                             className="border p-1 rounded w-full"
                             data-testid="filter-genre"
                             disabled={isLoadingTracks || isLoadingGenres}
@@ -163,7 +184,9 @@ export default function Heading({ filters, setFilters, setPage, setTotalPages }:
                                     <li
                                         key={genre}
                                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                        onMouseDown={() => handleGenreSelect(genre)}
+                                        onMouseDown={() =>
+                                            handleGenreSelect(genre)
+                                        }
                                     >
                                         {genre}
                                     </li>
@@ -183,7 +206,10 @@ export default function Heading({ filters, setFilters, setPage, setTotalPages }:
                     />
                 </div>
             </div>
-            <CreateTrackModal isModalOpened={isCreateModalOpened} closeModal={closeCreateModal} />
+            <CreateTrackModal
+                isModalOpened={isCreateModalOpened}
+                closeModal={closeCreateModal}
+            />
             <DeleteTracksModal
                 isModalOpened={isDeleteTracksModalOpened}
                 closeModal={closeDeleteTracksModal}

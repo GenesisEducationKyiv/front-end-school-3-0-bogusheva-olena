@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import {
+    createContext,
+    useContext,
+    useState,
+    ReactNode,
+    useEffect,
+} from "react";
 import { Track } from "../types";
 import { getAllTracks } from "../api/tracks";
 
@@ -16,7 +22,9 @@ interface TrackListContextType {
     isLoadingAllTracks: boolean;
 }
 
-const TrackListContext = createContext<TrackListContextType | undefined>(undefined);
+const TrackListContext = createContext<TrackListContextType | undefined>(
+    undefined,
+);
 
 export const TrackListProvider = ({ children }: { children: ReactNode }) => {
     const [updateCounter, setUpdateCounter] = useState(0);
@@ -29,9 +37,15 @@ export const TrackListProvider = ({ children }: { children: ReactNode }) => {
         setIsLoadingAllTracks(true);
         getAllTracks()
             .then((res) => {
-                setAllTracksIds(res.data.map((track) => track.id));
+                res.match(
+                    (res) => {
+                        setAllTracksIds(res.data.map((track) => track.id));
+                    },
+                    (error) => {
+                        console.error("Error fetching all tracks:", error);
+                    },
+                );
             })
-            .catch(console.error)
             .finally(() => {
                 setIsLoadingAllTracks(false);
             });
@@ -76,6 +90,7 @@ export const TrackListProvider = ({ children }: { children: ReactNode }) => {
 
 export const useTrackList = () => {
     const context = useContext(TrackListContext);
-    if (!context) throw new Error("useTrackList must be used within TrackListProvider");
+    if (!context)
+        throw new Error("useTrackList must be used within TrackListProvider");
     return context;
 };

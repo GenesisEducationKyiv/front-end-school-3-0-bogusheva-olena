@@ -1,11 +1,13 @@
 import { useState } from "react";
 import Modal from "../ui/Modal";
-import TrackForm, { FormValues } from "./TrackForm";
+import TrackForm from "./TrackForm";
 import { useTrackList } from "../context/track-list-context";
 import { useToast } from "../hooks/useToast";
 import { createTrack } from "../api/tracks";
 import { FormikHelpers } from "formik";
 import { useGenres } from "../context/genres-context";
+import { TrackFormValues } from "../types";
+import { TOAST_MESSAGES } from "../constants";
 
 interface Props {
     isModalOpened: boolean;
@@ -19,27 +21,50 @@ export default function CreateTrackModal({ isModalOpened, closeModal }: Props) {
     const { genres } = useGenres();
     const { showToast } = useToast();
 
-    const handleSubmit = (values: FormValues, { resetForm }: FormikHelpers<FormValues>) => {
+    const handleSubmit = (
+        values: TrackFormValues,
+        { resetForm }: FormikHelpers<TrackFormValues>,
+    ) => {
         setIsLoading(true);
 
-        createTrack(values.title, values.artist, values.album, values.genres, values.coverImage)
-            .then(() => {
-                showToast("Track created successfully!", "success");
-                updateTrackList();
-                resetForm();
-                closeModal();
-            })
-            .catch((error) => {
-                showToast("Failed to create track. Please try again.", "error");
-                console.error("Error creating track:", error);
+        createTrack(
+            values.title,
+            values.artist,
+            values.album ?? "",
+            values.genres,
+            values.coverImage ?? "",
+        )
+            .then((res) => {
+                res.match(
+                    (_) => {
+                        showToast(TOAST_MESSAGES.CREATE_SUCCESS, "success");
+                        updateTrackList();
+                        resetForm();
+                        closeModal();
+                    },
+                    (error) => {
+                        showToast(TOAST_MESSAGES.CREATE_FAIL, "error");
+                        console.error("Error creating track:", error);
+                    },
+                );
             })
             .finally(() => {
                 setIsLoading(false);
             });
     };
     return (
-        <Modal isOpened={isModalOpened} onClose={closeModal} title="Create Track" name="create-track">
-            <TrackForm genres={genres} closeModal={closeModal} isLoading={isLoading} onSubmit={handleSubmit} />
+        <Modal
+            isOpened={isModalOpened}
+            onClose={closeModal}
+            title="Create Track"
+            name="create-track"
+        >
+            <TrackForm
+                genres={genres}
+                closeModal={closeModal}
+                isLoading={isLoading}
+                onSubmit={handleSubmit}
+            />
         </Modal>
     );
 }

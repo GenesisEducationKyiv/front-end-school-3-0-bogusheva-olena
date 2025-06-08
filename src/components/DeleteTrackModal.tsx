@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { deleteTrack } from "../api/tracks";
 import { Track } from "../types";
-
+import { TOAST_MESSAGES } from "../constants";
 import { useTrackList } from "../context/track-list-context";
 import { useDeleteTracks } from "../context/delete-tracks-context";
 import { useToast } from "../hooks/useToast";
@@ -16,7 +16,11 @@ interface Props {
     closeModal: () => void;
 }
 
-export default function DeleteTrackModal({ isModalOpened, closeModal, track }: Props) {
+export default function DeleteTrackModal({
+    isModalOpened,
+    closeModal,
+    track,
+}: Props) {
     const [isLoading, setIsLoading] = useState(false);
 
     const { removeTrackFromList, updateTrackList } = useTrackList();
@@ -29,14 +33,20 @@ export default function DeleteTrackModal({ isModalOpened, closeModal, track }: P
         removeTrackFromList(track.id);
 
         deleteTrack(track.id)
-            .then(() => {
-                showToast("Track deleted successfully!", "success");
-                setSelectedToDeleteTracks((prev) => prev.filter((id) => id !== track.id));
-                closeModal();
-            })
-            .catch((error) => {
-                showToast("Failed to delete the track. Please try again.", "error");
-                console.error("Error deleting track:", error);
+            .then((res) => {
+                res.match(
+                    (_) => {
+                        showToast(TOAST_MESSAGES.DELETE_SUCCESS, "success");
+                        setSelectedToDeleteTracks((prev) =>
+                            prev.filter((id) => id !== track.id)
+                        );
+                        closeModal();
+                    },
+                    (error) => {
+                        showToast(TOAST_MESSAGES.DELETE_FAIL, "error");
+                        console.error("Error deleting track:", error);
+                    },
+                );
             })
             .finally(() => {
                 updateTrackList();
@@ -45,7 +55,12 @@ export default function DeleteTrackModal({ isModalOpened, closeModal, track }: P
     };
 
     return (
-        <Modal isOpened={isModalOpened} onClose={closeModal} title={"Delete Track"} name="delete-track">
+        <Modal
+            isOpened={isModalOpened}
+            onClose={closeModal}
+            title={"Delete Track"}
+            name="delete-track"
+        >
             <div className="mb-4">
                 <p>Do you want to delete the track:</p>
                 <p className="font-bold">

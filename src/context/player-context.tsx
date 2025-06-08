@@ -1,6 +1,13 @@
-import { createContext, useContext, useRef, useState, useEffect, ReactNode } from "react";
+import {
+    createContext,
+    useContext,
+    useRef,
+    useState,
+    useEffect,
+    ReactNode,
+} from "react";
 import { Track } from "../types";
-import { PATH } from "../constants";
+import { FILE_PATH } from "../constants";
 
 interface AudioPlayerContextType {
     playTrack: (track: Track) => void;
@@ -10,7 +17,9 @@ interface AudioPlayerContextType {
     progress: number;
 }
 
-const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
+const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(
+    undefined,
+);
 
 export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -50,13 +59,17 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
 
     const playTrack = (track: Track) => {
         if (!audioRef.current) return;
+        if (!track.audioFile) {
+            console.error("No audio file provided for this track");
+            return;
+        }
 
         const audio = audioRef.current;
 
         const isSameTrack = currentTrackId === track.id;
 
         if (!isSameTrack) {
-            audio.src = `${PATH}${track.audioFile}`;
+            audio.src = `${FILE_PATH}${track.audioFile}`;
             audio.currentTime = 0;
             setProgress(0);
         }
@@ -68,7 +81,11 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
                 setIsPlaying(true);
             })
             .catch((error) => {
-                console.error("Error playing audio:", error);
+                if (error.name === "NotAllowedError") {
+                    console.error("Playback was prevented by browser");
+                } else {
+                    console.error("Error playing audio:", error);
+                }
                 setIsPlaying(false);
             });
     };
@@ -81,7 +98,15 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <AudioPlayerContext.Provider value={{ playTrack, pauseTrack, isPlaying, currentTrackId, progress }}>
+        <AudioPlayerContext.Provider
+            value={{
+                playTrack,
+                pauseTrack,
+                isPlaying,
+                currentTrackId,
+                progress,
+            }}
+        >
             {children}
         </AudioPlayerContext.Provider>
     );
@@ -90,7 +115,9 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
 export const useAudioPlayer = () => {
     const context = useContext(AudioPlayerContext);
     if (!context) {
-        throw new Error("useAudioPlayer must be used within an AudioPlayerProvider");
+        throw new Error(
+            "useAudioPlayer must be used within an AudioPlayerProvider",
+        );
     }
     return context;
 };

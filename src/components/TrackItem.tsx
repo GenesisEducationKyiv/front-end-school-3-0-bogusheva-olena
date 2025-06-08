@@ -24,13 +24,27 @@ interface Props {
 const TrackItem = ({ track }: Props) => {
     const id = track.id;
 
-    const { openModal: openEditModal, closeModal: closeEditModal, isModalOpened: isEditModalOpened } = useModal();
-    const { openModal: openDeleteModal, closeModal: closeDeleteModal, isModalOpened: isDeleteModalOpened } = useModal();
-    const { openModal: openUploadModal, closeModal: closeUploadModal, isModalOpened: isUploadModalOpened } = useModal();
-    const { selectedToDeleteTracks, setSelectedToDeleteTracks } = useDeleteTracks();
-    const { playTrack, pauseTrack, isPlaying, currentTrackId } = useAudioPlayer();
+    const {
+        openModal: openEditModal,
+        closeModal: closeEditModal,
+        isModalOpened: isEditModalOpened,
+    } = useModal();
+    const {
+        openModal: openDeleteModal,
+        closeModal: closeDeleteModal,
+        isModalOpened: isDeleteModalOpened,
+    } = useModal();
+    const {
+        openModal: openUploadModal,
+        closeModal: closeUploadModal,
+        isModalOpened: isUploadModalOpened,
+    } = useModal();
+    const { selectedToDeleteTracks, setSelectedToDeleteTracks } =
+        useDeleteTracks();
+    const { playTrack, pauseTrack, isPlaying, currentTrackId } =
+        useAudioPlayer();
 
-    const [showMenu, setShowMenu] = useState(false);
+    const [isMenuShown, setIsMenuShown] = useState(false);
 
     const checked = selectedToDeleteTracks.includes(id);
     const isCurrent = currentTrackId === id;
@@ -45,7 +59,9 @@ const TrackItem = ({ track }: Props) => {
 
     const toggleChecked = () => {
         if (checked) {
-            setSelectedToDeleteTracks((prev) => prev.filter((trackId) => trackId !== id));
+            setSelectedToDeleteTracks((prev) =>
+                prev.filter((trackId) => trackId !== id),
+            );
         } else {
             setSelectedToDeleteTracks((prev) => [...prev, id]);
         }
@@ -53,7 +69,10 @@ const TrackItem = ({ track }: Props) => {
 
     return (
         <>
-            <li className="relative border rounded flex-grow" data-testid={`track-item-${id}`}>
+            <li
+                className="relative border rounded flex-grow"
+                data-testid={`track-item-${id}`}
+            >
                 <div className="flex items-center justify-end">
                     {track.album && (
                         <div
@@ -67,7 +86,9 @@ const TrackItem = ({ track }: Props) => {
                         <div className="relative" onClick={toggleChecked}>
                             <CollectionIcon
                                 className={`w-[26px] h-[26px] cursor-pointer ${
-                                    checked ? "[&>*]:fill-red-600" : "[&>*]:fill-green-600"
+                                    checked
+                                        ? "[&>*]:fill-red-600"
+                                        : "[&>*]:fill-green-600"
                                 }`}
                             />
                             <input
@@ -82,15 +103,15 @@ const TrackItem = ({ track }: Props) => {
                             <button
                                 type="button"
                                 className="border rounded p-1 text-sm hover:bg-gray-100"
-                                onClick={() => setShowMenu((prev) => !prev)}
+                                onClick={() => setIsMenuShown((prev) => !prev)}
                                 aria-label="Track options"
                             >
                                 <MenuIcon className="w-4 h-4" />
                             </button>
-                            {showMenu && (
+                            {isMenuShown && (
                                 <DropdownMenu
                                     track={track}
-                                    setShowMenu={setShowMenu}
+                                    setShowMenu={setIsMenuShown}
                                     openEditModal={openEditModal}
                                     openDeleteModal={openDeleteModal}
                                     openUploadModal={openUploadModal}
@@ -119,19 +140,37 @@ const TrackItem = ({ track }: Props) => {
                         )}
                     </div>
                     <div className="flex-grow text-left">
-                        <p data-testid={`track-item-${id}-title`} className="font-bold text-lg">
+                        <p
+                            data-testid={`track-item-${id}-title`}
+                            className="font-bold text-lg"
+                        >
                             {track.title}
                         </p>
-                        <p data-testid={`track-item-${id}-artist`} className="text-sm text-gray-500">
+                        <p
+                            data-testid={`track-item-${id}-artist`}
+                            className="text-sm text-gray-500"
+                        >
                             {track.artist}
                         </p>
                     </div>
                 </div>
                 <WaveVisualizer track={track} />
             </li>
-            <EditTrackModal track={track} isModalOpened={isEditModalOpened} closeModal={closeEditModal} />
-            <DeleteTrackModal isModalOpened={isDeleteModalOpened} closeModal={closeDeleteModal} track={track} />
-            <UploadTrackModal isModalOpened={isUploadModalOpened} closeModal={closeUploadModal} track={track} />
+            <EditTrackModal
+                track={track}
+                isModalOpened={isEditModalOpened}
+                closeModal={closeEditModal}
+            />
+            <DeleteTrackModal
+                isModalOpened={isDeleteModalOpened}
+                closeModal={closeDeleteModal}
+                track={track}
+            />
+            <UploadTrackModal
+                isModalOpened={isUploadModalOpened}
+                closeModal={closeUploadModal}
+                track={track}
+            />
         </>
     );
 };

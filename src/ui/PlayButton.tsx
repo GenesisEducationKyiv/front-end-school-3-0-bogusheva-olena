@@ -7,23 +7,26 @@ interface Props {
     onClick: () => void;
 }
 
+const PLAY_LABEL = "Play track";
+const PAUSE_LABEL = "Pause track";
+
 export default function PlayButton({ id, isPlaying, onClick }: Props) {
     return (
         <button
             type="button"
             onClick={onClick}
             data-testid={isPlaying ? `pause-button-${id}` : `play-button-${id}`}
-            aria-label={isPlaying ? "Pause track" : "Play track"}
+            aria-label={isPlaying ? PAUSE_LABEL : PLAY_LABEL}
         >
             {isPlaying ? (
                 <PauseIcon
                     className="[&>path]:fill-green-600 group-hover:[&>path]:fill-green-700"
-                    aria-label="Pause track"
+                    aria-label={PAUSE_LABEL}
                 />
             ) : (
                 <PlayIcon
                     className="[&>g>*]:fill-green-600 group-hover:[&>g>*]:fill-green-700"
-                    aria-label="Play track"
+                    aria-label={PLAY_LABEL}
                 />
             )}
         </button>

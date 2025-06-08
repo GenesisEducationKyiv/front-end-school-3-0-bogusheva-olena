@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import TracksList from "../components/TracksList";
 import { FilterOptions } from "../types";
+import { SORT_BY_OPTIONS, SORT_ORDER_OPTIONS } from "../constants";
+
 import Heading from "../components/Heading";
+import TracksList from "../components/TracksList";
 
 export default function MusicTracksPage() {
     const [filters, setFilters] = useState<FilterOptions>({
-        sortBy: "title",
-        sortOrder: "asc",
+        sortBy: SORT_BY_OPTIONS[0],
+        sortOrder: SORT_ORDER_OPTIONS[0],
         search: "",
         genre: "",
         artist: "",
