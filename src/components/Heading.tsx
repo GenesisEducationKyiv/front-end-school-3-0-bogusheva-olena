@@ -6,38 +6,36 @@ import {
     useState,
 } from "react";
 
-import { FilterOptions } from "../types";
 import { capitalize } from "../utils/utils";
-import { useGenres } from "../context/genres-context";
-import { useDeleteTracks } from "../context/delete-tracks-context";
-import { useTrackList } from "../context/track-list-context";
-import { useModal } from "../hooks/useModal";
-
-import CreateTrackModal from "./CreateTrackModal";
-import DeleteTracksModal from "./DeleteTracksModal";
 import {
     FILTER_LABELS,
     SEARCH_DEBOUNCE_MS,
     SORT_BY_OPTIONS,
     SORT_ORDER_OPTIONS,
 } from "../constants";
+import { isFilterKey } from "../types";
+import { useGenres } from "../context/genres-context";
+import { useDeleteTracks } from "../context/delete-tracks-context";
+import { useTrackList } from "../context/track-list-context";
+
+import { useQueryParamsController } from "../hooks/useQueryParamsController";
+import { useModal } from "../hooks/useModal";
+
+import CreateTrackModal from "./CreateTrackModal";
+import DeleteTracksModal from "./DeleteTracksModal";
 
 interface FiltersProps {
-    filters: FilterOptions;
-    setFilters: Dispatch<SetStateAction<FilterOptions>>;
-    setPage: Dispatch<SetStateAction<number>>;
     setTotalPages: Dispatch<SetStateAction<number>>;
 }
 
-export default function Heading({
-    filters,
-    setFilters,
-    setPage,
-    setTotalPages,
-}: FiltersProps) {
-    const [debouncedSearch, setDebouncedSearch] = useState(
-        filters.search || "",
-    );
+export default function Heading({ setTotalPages }: FiltersProps) {
+    const { filters, updateQueryParam } = useQueryParamsController();
+
+    const [debounced, setDebounced] = useState({
+        search: filters.search,
+        artist: filters.artist,
+    });
+
     const [showSuggestions, setShowSuggestions] = useState(false);
 
     const { selectedToDeleteTracks } = useDeleteTracks();
@@ -55,41 +53,47 @@ export default function Heading({
     } = useModal();
 
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            if (debouncedSearch !== filters.search) {
-                setFilters((prev) => ({
-                    ...prev,
-                    search: debouncedSearch,
-                }));
-            }
-        }, SEARCH_DEBOUNCE_MS);
+        setDebounced({ search: filters.search, artist: filters.artist });
+    }, [filters.search, filters.artist]);
 
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            updateQueryParam("search", debounced.search.trim());
+        }, SEARCH_DEBOUNCE_MS);
         return () => clearTimeout(timeout);
-    }, [debouncedSearch, filters.search, setFilters]);
+    }, [debounced.search]);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            updateQueryParam("artist", debounced.artist.trim());
+        }, SEARCH_DEBOUNCE_MS);
+        return () => clearTimeout(timeout);
+    }, [debounced.artist]);
 
     const matchingGenres =
         filters.genre.length > 0
             ? genres.filter((g) =>
-                  g.toLowerCase().startsWith(filters.genre.toLowerCase()),
+                  g.toLowerCase().startsWith(filters.genre.toLowerCase())
               )
             : [];
 
     const handleGenreSelect = (genre: string) => {
-        setFilters((prev) => ({ ...prev, genre }));
+        updateQueryParam("genre", genre);
         setShowSuggestions(false);
     };
 
     const handleChange = (
-        e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+        e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => {
         const { name, value } = e.target;
-        if (name === "search") {
-            setDebouncedSearch(value);
+
+        if (!isFilterKey(name)) return;
+
+        if (name === "search" || name === "artist") {
+            setDebounced((prev) => ({ ...prev, [name]: value }));
         } else {
-            setFilters((prev) => ({
-                ...prev,
-                [name]: name === "genre" ? capitalize(value) : value,
-            }));
+            const paramValue = name === "genre" ? capitalize(value) : value;
+            updateQueryParam(name, paramValue);
         }
     };
 
@@ -154,7 +158,7 @@ export default function Heading({
                         type="text"
                         name="search"
                         placeholder="Search..."
-                        value={debouncedSearch}
+                        value={debounced.search}
                         onChange={handleChange}
                         disabled={isLoadingTracks}
                         className="border p-1 rounded w-full"
@@ -198,7 +202,7 @@ export default function Heading({
                         type="text"
                         name="artist"
                         placeholder="Search artist..."
-                        value={filters.artist || ""}
+                        value={debounced.artist}
                         onChange={handleChange}
                         disabled={isLoadingTracks}
                         className="border p-1 rounded w-full"
@@ -213,7 +217,6 @@ export default function Heading({
             <DeleteTracksModal
                 isModalOpened={isDeleteTracksModalOpened}
                 closeModal={closeDeleteTracksModal}
-                setPage={setPage}
                 setTotalPages={setTotalPages}
             />
         </>

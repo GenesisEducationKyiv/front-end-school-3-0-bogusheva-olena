@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SORT_BY_OPTIONS, SORT_ORDER_OPTIONS } from "../constants";
 
 export const genresResponseSchema = z.array(z.string());
 
@@ -48,4 +49,17 @@ export const trackFormSchema = z.object({
         .url("Cover image must be a valid image URL")
         .optional()
         .or(z.literal("")),
+});
+
+export const sortBySchema = z.enum(SORT_BY_OPTIONS);
+export const sortOrderSchema = z.enum(SORT_ORDER_OPTIONS);
+
+export const getTracksParamsSchema = z.object({
+    page: z.coerce.number().min(1).optional(),
+    limit: z.coerce.number().min(1).optional(),
+    sort: sortBySchema.optional(),
+    order: sortOrderSchema.optional(),
+    search: z.string().trim().optional(),
+    genre: z.string().trim().optional(),
+    artist: z.string().trim().optional(),
 });

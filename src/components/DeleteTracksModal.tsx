@@ -8,22 +8,24 @@ import { useToast } from "../hooks/useToast";
 import { TRACK_DELETE_MODE, TrackDeleteMode } from "../types";
 import { TOAST_MESSAGES } from "../constants";
 
+import { useQueryParamsController } from "../hooks/useQueryParamsController";
+
 import Loader from "../ui/Loader";
 import Modal from "../ui/Modal";
 
 interface Props {
     isModalOpened: boolean;
     closeModal: () => void;
-    setPage: Dispatch<SetStateAction<number>>;
     setTotalPages: Dispatch<SetStateAction<number>>;
 }
 
 export default function DeleteTracksModal({
     isModalOpened,
     closeModal,
-    setPage,
     setTotalPages,
 }: Props) {
+    const { resetAllQueryParams, updateQueryParam } =
+        useQueryParamsController();
     const [isLoading, setIsLoading] = useState(false);
     const [mode, setMode] = useState<TrackDeleteMode>(
         TRACK_DELETE_MODE.SELECTED
@@ -43,11 +45,6 @@ export default function DeleteTracksModal({
         const tracksToDelete = isSelectedMode
             ? selectedToDeleteTracks
             : allTracksIds;
-        if (isAllMode) {
-            setTracks([]);
-            setPage(1);
-            setTotalPages(0);
-        }
 
         deleteTracks(tracksToDelete)
             .then((res) => {
@@ -57,7 +54,14 @@ export default function DeleteTracksModal({
                             TOAST_MESSAGES.MULTIDELETE_SUCCESS,
                             "success"
                         );
-                        updateTrackList();
+                        if (isAllMode) {
+                            setTracks([]);
+                            resetAllQueryParams();
+                            setTotalPages(0);
+                        } else {
+                            updateTrackList();
+                            updateQueryParam("page", "1", { resetPage: false });
+                        }
                         setSelectedToDeleteTracks([]);
                         closeModal();
                     },

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import Modal from "../ui/Modal";
 import TrackForm from "./TrackForm";
-import { useTrackList } from "../context/track-list-context";
 import { useToast } from "../hooks/useToast";
 import { createTrack } from "../api/tracks";
 import { FormikHelpers } from "formik";
 import { useGenres } from "../context/genres-context";
 import { TrackFormValues } from "../types";
 import { TOAST_MESSAGES } from "../constants";
+import { useQueryParamsController } from "../hooks/useQueryParamsController";
 
 interface Props {
     isModalOpened: boolean;
@@ -17,7 +17,7 @@ interface Props {
 export default function CreateTrackModal({ isModalOpened, closeModal }: Props) {
     const [isLoading, setIsLoading] = useState(false);
 
-    const { updateTrackList } = useTrackList();
+    const { resetAllQueryParams } = useQueryParamsController();
     const { genres } = useGenres();
     const { showToast } = useToast();
 
@@ -38,7 +38,7 @@ export default function CreateTrackModal({ isModalOpened, closeModal }: Props) {
                 res.match(
                     (_) => {
                         showToast(TOAST_MESSAGES.CREATE_SUCCESS, "success");
-                        updateTrackList();
+                        resetAllQueryParams();
                         resetForm();
                         closeModal();
                     },

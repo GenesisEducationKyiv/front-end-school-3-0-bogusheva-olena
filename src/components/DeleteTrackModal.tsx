@@ -6,6 +6,7 @@ import { TOAST_MESSAGES } from "../constants";
 import { useTrackList } from "../context/track-list-context";
 import { useDeleteTracks } from "../context/delete-tracks-context";
 import { useToast } from "../hooks/useToast";
+import { useQueryParamsController } from "../hooks/useQueryParamsController";
 
 import Loader from "../ui/Loader";
 import Modal from "../ui/Modal";
@@ -22,7 +23,7 @@ export default function DeleteTrackModal({
     track,
 }: Props) {
     const [isLoading, setIsLoading] = useState(false);
-
+    const { updateQueryParam } = useQueryParamsController();
     const { removeTrackFromList, updateTrackList } = useTrackList();
     const { setSelectedToDeleteTracks } = useDeleteTracks();
     const { showToast } = useToast();
@@ -40,6 +41,8 @@ export default function DeleteTrackModal({
                         setSelectedToDeleteTracks((prev) =>
                             prev.filter((id) => id !== track.id)
                         );
+                        updateQueryParam("page", "1", { resetPage: false });
+
                         closeModal();
                     },
                     (error) => {
