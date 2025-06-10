@@ -5,6 +5,7 @@ import {
     ReactNode,
     useEffect,
 } from "react";
+import { R, pipe } from "@mobily/ts-belt";
 import { Track } from "../types";
 import { getAllTracks } from "../api/tracks";
 
@@ -23,7 +24,7 @@ interface TrackListContextType {
 }
 
 const TrackListContext = createContext<TrackListContextType | undefined>(
-    undefined,
+    undefined
 );
 
 export const TrackListProvider = ({ children }: { children: ReactNode }) => {
@@ -34,21 +35,24 @@ export const TrackListProvider = ({ children }: { children: ReactNode }) => {
     const [isLoadingAllTracks, setIsLoadingAllTracks] = useState(true);
 
     useEffect(() => {
-        setIsLoadingAllTracks(true);
-        getAllTracks()
-            .then((res) => {
-                res.match(
-                    (res) => {
-                        setAllTracksIds(res.data.map((track) => track.id));
-                    },
-                    (error) => {
-                        console.error("Error fetching all tracks:", error);
-                    },
-                );
-            })
-            .finally(() => {
-                setIsLoadingAllTracks(false);
-            });
+        const fetchAllTracks = async () => {
+            setIsLoadingAllTracks(true);
+
+            const res = await getAllTracks();
+            pipe(
+                res,
+                R.tap((res) => {
+                    setAllTracksIds(res.data.map((track) => track.id));
+                }),
+                R.tapError((err) => {
+                    console.error("Error fetching all tracks:", err);
+                })
+            );
+
+            setIsLoadingAllTracks(false);
+        };
+
+        void fetchAllTracks();
     }, []);
 
     const updateTrackList = () => {
