@@ -35,8 +35,10 @@ export const TrackListProvider = ({ children }: { children: ReactNode }) => {
     const [isLoadingAllTracks, setIsLoadingAllTracks] = useState(true);
 
     useEffect(() => {
-        setIsLoadingAllTracks(true);
-        void getAllTracks().then((res) => {
+        const fetchAllTracks = async () => {
+            setIsLoadingAllTracks(true);
+
+            const res = await getAllTracks();
             pipe(
                 res,
                 R.tap((res) => {
@@ -46,9 +48,11 @@ export const TrackListProvider = ({ children }: { children: ReactNode }) => {
                     console.error("Error fetching all tracks:", err);
                 })
             );
-        });
 
-        setIsLoadingAllTracks(false);
+            setIsLoadingAllTracks(false);
+        };
+
+        void fetchAllTracks();
     }, []);
 
     const updateTrackList = () => {

@@ -3,13 +3,14 @@ import { useSearchParams } from "react-router-dom";
 import { O, pipe } from "@mobily/ts-belt";
 import {
     GetTracksParams,
-    QueryParamsKeys,
+    QueryParamsKey,
     QueryParamsOptions,
     SortBy,
     SortOrder,
 } from "../types";
 import {
     INITIAL_PAGE_LIMIT,
+    QUERY_PARAMS,
     SORT_BY_OPTIONS,
     SORT_ORDER_OPTIONS,
 } from "../constants";
@@ -23,7 +24,7 @@ export function useQueryParamsController() {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const filters: QueryParamsOptions = useMemo(() => {
-        const getParam = (key: string, fallback = "") =>
+        const getParam = (key: QueryParamsKey, fallback = "") =>
             O.getWithDefault(fallback)(O.fromNullable(searchParams.get(key)));
 
         const parseSortBy = (value: string | null) =>
@@ -31,7 +32,7 @@ export function useQueryParamsController() {
                 sortBySchema.safeParse(v).success ? O.Some(v as SortBy) : O.None
             )(O.fromNullable(value));
         const sortBy = O.getWithDefault<SortBy>(SORT_BY_OPTIONS[0])(
-            parseSortBy(searchParams.get("sortBy"))
+            parseSortBy(searchParams.get(QUERY_PARAMS.sortBy))
         );
         const parseSortOrder = (value: string | null) =>
             O.flatMap((v: string) =>
@@ -41,21 +42,21 @@ export function useQueryParamsController() {
             )(O.fromNullable(value));
 
         const sortOrder = O.getWithDefault<SortOrder>(SORT_ORDER_OPTIONS[0])(
-            parseSortOrder(searchParams.get("sortOrder"))
+            parseSortOrder(searchParams.get(QUERY_PARAMS.sortOrder))
         );
 
         return {
             sortBy: sortBy,
             sortOrder: sortOrder,
-            search: getParam("search"),
-            genre: getParam("genre"),
-            artist: getParam("artist"),
-            page: getParam("page", "1"),
+            search: getParam(QUERY_PARAMS.search),
+            genre: getParam(QUERY_PARAMS.genre),
+            artist: getParam(QUERY_PARAMS.artist),
+            page: getParam(QUERY_PARAMS.page, "1"),
         };
     }, [searchParams]);
 
     const updateQueryParam = (
-        key: QueryParamsKeys,
+        key: QueryParamsKey,
         value: string,
         options?: { resetPage?: boolean }
     ) => {
@@ -67,12 +68,12 @@ export function useQueryParamsController() {
             newParams.delete(key);
         }
 
-        if (key !== "page" && options?.resetPage !== false) {
-            newParams.set("page", "1");
+        if (key !== QUERY_PARAMS.page && options?.resetPage !== false) {
+            newParams.set(QUERY_PARAMS.page, "1");
         }
 
-        if (newParams.get("page") === "1") {
-            newParams.delete("page");
+        if (newParams.get(QUERY_PARAMS.page) === "1") {
+            newParams.delete(QUERY_PARAMS.page);
         }
 
         setSearchParams(newParams);

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { R, pipe } from "@mobily/ts-belt";
 import { deleteTrack } from "../api/tracks";
 import { Track } from "../types";
-import { TOAST_MESSAGES } from "../constants";
+import { QUERY_PARAMS, TOAST_MESSAGES } from "../constants";
 import { useTrackList } from "../context/track-list-context";
 import { useDeleteTracks } from "../context/delete-tracks-context";
 import { useToast } from "../hooks/useToast";
@@ -28,28 +28,27 @@ export default function DeleteTrackModal({
     const { setSelectedToDeleteTracks } = useDeleteTracks();
     const { showToast } = useToast();
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         setIsLoading(true);
 
         removeTrackFromList(track.id);
 
-        void deleteTrack(track.id).then((res) => {
-            pipe(
-                res,
-                R.tap((_) => {
-                    showToast(TOAST_MESSAGES.DELETE_SUCCESS, "success");
-                    setSelectedToDeleteTracks((prev) =>
-                        prev.filter((id) => id !== track.id)
-                    );
-                    updateQueryParam("page", "1", { resetPage: false });
-                    closeModal();
-                }),
-                R.tapError((err) => {
-                    showToast(TOAST_MESSAGES.DELETE_FAIL, "error");
-                    console.error("Error deleting track:", err);
-                })
-            );
-        });
+        const res = await deleteTrack(track.id);
+        pipe(
+            res,
+            R.tap((_) => {
+                showToast(TOAST_MESSAGES.DELETE_SUCCESS, "success");
+                setSelectedToDeleteTracks((prev) =>
+                    prev.filter((id) => id !== track.id)
+                );
+                updateQueryParam(QUERY_PARAMS.page, "1", { resetPage: false });
+                closeModal();
+            }),
+            R.tapError((err) => {
+                showToast(TOAST_MESSAGES.DELETE_FAIL, "error");
+                console.error("Error deleting track:", err);
+            })
+        );
 
         updateTrackList();
         setIsLoading(false);

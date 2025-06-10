@@ -3,6 +3,7 @@ export * from "./routes";
 export * from "./filters";
 export * from "./audiofile";
 export * from "./toast-messages";
+export * from "./query-params";
 
 export const INITIAL_PAGE_LIMIT = 5;
 

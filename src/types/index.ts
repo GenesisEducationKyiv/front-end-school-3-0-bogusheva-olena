@@ -5,19 +5,14 @@ import {
     getTracksParamsSchema,
     trackFormSchema,
     trackSchema,
+    trackSchemaWithAudioFile,
+    trackSchemaWithoutAudioFile,
 } from "../schemas/schemas";
-import { SORT_BY_OPTIONS, SORT_ORDER_OPTIONS } from "../constants";
-
-export const QUERY_PARAMS_KEYS = [
-    "search",
-    "sortBy",
-    "sortOrder",
-    "genre",
-    "artist",
-    "page",
-] as const;
-
-export type QueryParamsKeys = (typeof QUERY_PARAMS_KEYS)[number];
+import {
+    QUERY_PARAMS,
+    SORT_BY_OPTIONS,
+    SORT_ORDER_OPTIONS,
+} from "../constants";
 
 export type SortBy = (typeof SORT_BY_OPTIONS)[number];
 export type SortOrder = (typeof SORT_ORDER_OPTIONS)[number];
@@ -31,9 +26,13 @@ export type QueryParamsOptions = {
     page: string;
 };
 
+export type QueryParamsKey = keyof typeof QUERY_PARAMS;
+
 export type GetTracksParams = z.infer<typeof getTracksParamsSchema>;
 
 export type Track = z.infer<typeof trackSchema>;
+export type TrackWithoutAudioFile = z.infer<typeof trackSchemaWithoutAudioFile>;
+export type TrackWithAudioFile = z.infer<typeof trackSchemaWithAudioFile>;
 
 export type TrackFormValues = z.infer<typeof trackFormSchema>;
 

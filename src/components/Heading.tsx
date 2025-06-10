@@ -9,6 +9,7 @@ import {
 import { capitalize } from "../utils/utils";
 import {
     FILTER_LABELS,
+    QUERY_PARAMS,
     SEARCH_DEBOUNCE_MS,
     SORT_BY_OPTIONS,
     SORT_ORDER_OPTIONS,
@@ -58,14 +59,14 @@ export default function Heading({ setTotalPages }: FiltersProps) {
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            updateQueryParam("search", debounced.search.trim());
+            updateQueryParam(QUERY_PARAMS.search, debounced.search.trim());
         }, SEARCH_DEBOUNCE_MS);
         return () => clearTimeout(timeout);
     }, [debounced.search]);
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            updateQueryParam("artist", debounced.artist.trim());
+            updateQueryParam(QUERY_PARAMS.artist, debounced.artist.trim());
         }, SEARCH_DEBOUNCE_MS);
         return () => clearTimeout(timeout);
     }, [debounced.artist]);
@@ -78,7 +79,7 @@ export default function Heading({ setTotalPages }: FiltersProps) {
             : [];
 
     const handleGenreSelect = (genre: string) => {
-        updateQueryParam("genre", genre);
+        updateQueryParam(QUERY_PARAMS.genre, genre);
         setShowSuggestions(false);
     };
 
@@ -89,10 +90,11 @@ export default function Heading({ setTotalPages }: FiltersProps) {
 
         if (!isFilterKey(name)) return;
 
-        if (name === "search" || name === "artist") {
+        if (name === QUERY_PARAMS.search || name === QUERY_PARAMS.artist) {
             setDebounced((prev) => ({ ...prev, [name]: value }));
         } else {
-            const paramValue = name === "genre" ? capitalize(value) : value;
+            const paramValue =
+                name === QUERY_PARAMS.genre ? capitalize(value) : value;
             updateQueryParam(name, paramValue);
         }
     };

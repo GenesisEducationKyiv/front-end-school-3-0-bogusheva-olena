@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
 import { R, pipe } from "@mobily/ts-belt";
-import { TOAST_MESSAGES } from "../constants";
+import { QUERY_PARAMS, TOAST_MESSAGES } from "../constants";
 import { getTracks } from "../api/tracks";
 
 import { useTrackList } from "../context/track-list-context";
@@ -33,9 +33,11 @@ export default function TracksList({ totalPages, setTotalPages }: Props) {
 
     useEffect(
         () => {
-            setIsLoadingTracks(true);
+            const fetchTracks = async () => {
+                setIsLoadingTracks(true);
 
-            void getTracks(requestTracksParams).then((res) => {
+                const res = await getTracks(requestTracksParams);
+
                 pipe(
                     res,
                     R.tap((res) => {
@@ -47,21 +49,24 @@ export default function TracksList({ totalPages, setTotalPages }: Props) {
                         showToast(TOAST_MESSAGES.FETCH_FAIL, "error");
                     })
                 );
-            });
 
-            setIsLoadingTracks(false);
+                setIsLoadingTracks(false);
+            };
+
+            void fetchTracks();
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [filters, updateCounter]
     );
 
     const handlePrevPage = () => {
-        if (currentPage > 1) updateQueryParam("page", String(currentPage - 1));
+        if (currentPage > 1)
+            updateQueryParam(QUERY_PARAMS.page, String(currentPage - 1));
     };
 
     const handleNextPage = () => {
         if (currentPage < totalPages)
-            updateQueryParam("page", String(currentPage + 1));
+            updateQueryParam(QUERY_PARAMS.page, String(currentPage + 1));
     };
 
     if (!isLoadingTracks && !tracks.length)

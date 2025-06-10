@@ -31,7 +31,7 @@ export default function EditTrackModal({
     const { genres, isLoadingGenres } = useGenres();
     const { filters, resetAllQueryParams } = useQueryParamsController();
 
-    const handleSubmit = (values: TrackFormValues) => {
+    const handleSubmit = async (values: TrackFormValues) => {
         if (!track?.id) return;
         setIsLoading(true);
 
@@ -56,30 +56,29 @@ export default function EditTrackModal({
 
         updateTrackInList(updatedTrack);
 
-        void updateTrack(
+        const res = await updateTrack(
             track.id,
             values.title,
             values.artist,
             values.album ?? "",
             values.genres,
             values.coverImage ?? ""
-        ).then((res) => {
-            pipe(
-                res,
-                R.tap((_) => {
-                    showToast(TOAST_MESSAGES.UPDATE_SUCCESS, "success");
-                    if (hasChanges && doesNotMatchFilters) {
-                        resetAllQueryParams();
-                    }
-                    closeModal();
-                }),
-                R.tapError((err) => {
-                    showToast(TOAST_MESSAGES.UPDATE_FAIL, "error");
-                    updateTrackInList(prevTrack);
-                    console.error("Error updating track:", err);
-                })
-            );
-        });
+        );
+        pipe(
+            res,
+            R.tap((_) => {
+                showToast(TOAST_MESSAGES.UPDATE_SUCCESS, "success");
+                if (hasChanges && doesNotMatchFilters) {
+                    resetAllQueryParams();
+                }
+                closeModal();
+            }),
+            R.tapError((err) => {
+                showToast(TOAST_MESSAGES.UPDATE_FAIL, "error");
+                updateTrackInList(prevTrack);
+                console.error("Error updating track:", err);
+            })
+        );
 
         setIsLoading(false);
     };

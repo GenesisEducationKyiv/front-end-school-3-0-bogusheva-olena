@@ -1,7 +1,11 @@
-import { QUERY_PARAMS_KEYS, QueryParamsKeys } from ".";
+import { QUERY_PARAMS } from "../constants";
 
-export function isFilterKey(value: string): value is QueryParamsKeys {
-    return (QUERY_PARAMS_KEYS as readonly string[]).includes(value);
+const allowedKeys = Object.values(QUERY_PARAMS) as readonly string[];
+
+export function isFilterKey(
+    value: string
+): value is (typeof QUERY_PARAMS)[keyof typeof QUERY_PARAMS] {
+    return allowedKeys.includes(value);
 }
 
 export function getValidParam<T extends string>(

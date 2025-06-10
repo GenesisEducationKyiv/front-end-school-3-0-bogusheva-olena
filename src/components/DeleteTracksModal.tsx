@@ -6,7 +6,7 @@ import { useTrackList } from "../context/track-list-context";
 import { useDeleteTracks } from "../context/delete-tracks-context";
 import { useToast } from "../hooks/useToast";
 import { TRACK_DELETE_MODE, TrackDeleteMode } from "../types";
-import { TOAST_MESSAGES } from "../constants";
+import { QUERY_PARAMS, TOAST_MESSAGES } from "../constants";
 
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
 
@@ -40,35 +40,36 @@ export default function DeleteTracksModal({
         useDeleteTracks();
     const { showToast } = useToast();
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         setIsLoading(true);
         const tracksToDelete = isSelectedMode
             ? selectedToDeleteTracks
             : allTracksIds;
 
-        void deleteTracks(tracksToDelete).then((res) => {
-            pipe(
-                res,
-                R.tap((_) => {
-                    showToast(TOAST_MESSAGES.MULTIDELETE_SUCCESS, "success");
-                    if (isAllMode) {
-                        setTracks([]);
-                        resetAllQueryParams();
-                        setTotalPages(0);
-                    } else {
-                        updateTrackList();
-                        updateQueryParam("page", "1", { resetPage: false });
-                    }
-                    setSelectedToDeleteTracks([]);
-                    closeModal();
-                }),
-                R.tapError((err) => {
-                    showToast(TOAST_MESSAGES.MULTIDELETE_FAIL, "error");
-                    console.error("Error deleting tracks:", err);
-                    if (isAllMode) updateTrackList();
-                })
-            );
-        });
+        const res = await deleteTracks(tracksToDelete);
+        pipe(
+            res,
+            R.tap((_) => {
+                showToast(TOAST_MESSAGES.MULTIDELETE_SUCCESS, "success");
+                if (isAllMode) {
+                    setTracks([]);
+                    resetAllQueryParams();
+                    setTotalPages(0);
+                } else {
+                    updateTrackList();
+                    updateQueryParam(QUERY_PARAMS.page, "1", {
+                        resetPage: false,
+                    });
+                }
+                setSelectedToDeleteTracks([]);
+                closeModal();
+            }),
+            R.tapError((err) => {
+                showToast(TOAST_MESSAGES.MULTIDELETE_FAIL, "error");
+                console.error("Error deleting tracks:", err);
+                if (isAllMode) updateTrackList();
+            })
+        );
 
         setIsLoading(false);
     };

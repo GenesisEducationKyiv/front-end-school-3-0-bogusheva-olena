@@ -6,6 +6,7 @@ import { useToast } from "../hooks/useToast";
 import { createTrack } from "../api/tracks";
 import { FormikHelpers } from "formik";
 import { useGenres } from "../context/genres-context";
+import { useTrackList } from "../context/track-list-context";
 import { TrackFormValues } from "../types";
 import { TOAST_MESSAGES } from "../constants";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
@@ -21,34 +22,35 @@ export default function CreateTrackModal({ isModalOpened, closeModal }: Props) {
     const { resetAllQueryParams } = useQueryParamsController();
     const { genres } = useGenres();
     const { showToast } = useToast();
+    const { updateTrackList } = useTrackList();
 
-    const handleSubmit = (
+    const handleSubmit = async (
         values: TrackFormValues,
         { resetForm }: FormikHelpers<TrackFormValues>
     ) => {
         setIsLoading(true);
 
-        void createTrack(
+        const res = await createTrack(
             values.title,
             values.artist,
             values.album ?? "",
             values.genres,
             values.coverImage ?? ""
-        ).then((res) => {
-            pipe(
-                res,
-                R.tap((_) => {
-                    showToast(TOAST_MESSAGES.CREATE_SUCCESS, "success");
-                    resetAllQueryParams();
-                    resetForm();
-                    closeModal();
-                }),
-                R.tapError((err) => {
-                    showToast(TOAST_MESSAGES.CREATE_FAIL, "error");
-                    console.error("Error creating track:", err);
-                })
-            );
-        });
+        );
+        pipe(
+            res,
+            R.tap((_) => {
+                showToast(TOAST_MESSAGES.CREATE_SUCCESS, "success");
+                updateTrackList();
+                resetAllQueryParams();
+                resetForm();
+                closeModal();
+            }),
+            R.tapError((err) => {
+                showToast(TOAST_MESSAGES.CREATE_FAIL, "error");
+                console.error("Error creating track:", err);
+            })
+        );
 
         setIsLoading(false);
     };

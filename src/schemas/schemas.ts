@@ -13,8 +13,16 @@ export const trackSchema = z.object({
     coverImage: z.string().optional(),
     createdAt: z.string(),
     updatedAt: z.string(),
-    audioFile: z.string().nullable().optional(),
+    audioFile: z.string().optional(),
     hasFile: z.boolean().optional(),
+});
+
+export const trackSchemaWithoutAudioFile = trackSchema.omit({
+    audioFile: true,
+});
+
+export const trackSchemaWithAudioFile = trackSchema.extend({
+    audioFile: z.string(),
 });
 
 export const getTracksResponseSchema = z.object({

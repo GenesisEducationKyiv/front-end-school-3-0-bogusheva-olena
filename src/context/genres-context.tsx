@@ -20,9 +20,10 @@ export const GenresProvider = ({ children }: { children: ReactNode }) => {
     const [isLoadingGenres, setIsLoadingGenres] = useState(true);
 
     useEffect(() => {
-        setIsLoadingGenres(true);
+        const fetchGenres = async () => {
+            setIsLoadingGenres(true);
 
-        void getGenres().then((res) => {
+            const res = await getGenres();
             pipe(
                 res,
                 R.tap((res) => {
@@ -32,9 +33,10 @@ export const GenresProvider = ({ children }: { children: ReactNode }) => {
                     console.error("Failed to load genres:", err);
                 })
             );
-        });
+            setIsLoadingGenres(false);
+        };
 
-        setIsLoadingGenres(false);
+        void fetchGenres();
     }, []);
 
     return (

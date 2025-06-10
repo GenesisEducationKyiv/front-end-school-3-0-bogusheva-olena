@@ -53,45 +53,46 @@ export default function UploadTrackModal({
 
         setIsLoading(true);
 
-        void uploadTrackFile(track.id, file).then((res) => {
-            pipe(
-                res,
-                R.tap((_) => {
-                    showToast(TOAST_MESSAGES.UPLOAD_FILE_SUCCESS, "success");
-                    updateTrackList();
-                    closeModal();
-                }),
-                R.tapError((err) => {
-                    showToast(TOAST_MESSAGES.UPLOAD_FILE_FAIL, "error");
-                    console.error("Error uploading track:", err);
-                })
-            );
-        });
+        const res = await uploadTrackFile(track.id, file);
+
+        pipe(
+            res,
+            R.tap((_) => {
+                showToast(TOAST_MESSAGES.UPLOAD_FILE_SUCCESS, "success");
+                updateTrackList();
+                closeModal();
+            }),
+            R.tapError((err) => {
+                showToast(TOAST_MESSAGES.UPLOAD_FILE_FAIL, "error");
+                console.error("Error uploading track:", err);
+            })
+        );
 
         setIsLoading(false);
     };
 
     const originalTrack = { ...track };
 
-    const handleDeleteFile = () => {
+    const handleDeleteFile = async () => {
         setIsLoading(true);
 
-        updateTrackInList({ ...track, audioFile: null });
+        const { audioFile, ...rest } = track;
+        updateTrackInList(rest);
 
-        void deleteTrackFile(track.id).then((res) => {
-            pipe(
-                res,
-                R.tap((_) => {
-                    showToast(TOAST_MESSAGES.DELETE_FILE_SUCCESS, "success");
-                    closeModal();
-                }),
-                R.tapError((err) => {
-                    showToast(TOAST_MESSAGES.DELETE_FILE_FAIL, "error");
-                    updateTrackInList(originalTrack);
-                    console.error("Error deleting track file:", err);
-                })
-            );
-        });
+        const res = await deleteTrackFile(track.id);
+
+        pipe(
+            res,
+            R.tap((_) => {
+                showToast(TOAST_MESSAGES.DELETE_FILE_SUCCESS, "success");
+                closeModal();
+            }),
+            R.tapError((err) => {
+                showToast(TOAST_MESSAGES.DELETE_FILE_FAIL, "error");
+                updateTrackInList(originalTrack);
+                console.error("Error deleting track file:", err);
+            })
+        );
 
         setIsLoading(false);
     };

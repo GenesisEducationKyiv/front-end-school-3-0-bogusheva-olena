@@ -1,8 +1,18 @@
 import { api } from "./axios";
 import { z } from "zod";
 import { Result, R } from "@mobily/ts-belt";
-import { GetTracksParams, Track } from "../types";
-import { trackSchema, getTracksResponseSchema } from "../schemas/schemas";
+import {
+    GetTracksParams,
+    Track,
+    TrackWithAudioFile,
+    TrackWithoutAudioFile,
+} from "../types";
+import {
+    trackSchema,
+    getTracksResponseSchema,
+    trackSchemaWithoutAudioFile,
+    trackSchemaWithAudioFile,
+} from "../schemas/schemas";
 import { normalizeError } from "../utils/utils";
 import { API_ROUTES, COLLECTION_TRACKS_LIMIT } from "../constants";
 
@@ -105,7 +115,7 @@ export async function deleteTrack(id: string): Promise<R.Result<{}, Error>> {
 export async function uploadTrackFile(
     id: string,
     file: File
-): Promise<Result<Track, Error>> {
+): Promise<Result<TrackWithAudioFile, Error>> {
     const formData = new FormData();
     formData.append("file", file);
 
@@ -119,7 +129,7 @@ export async function uploadTrackFile(
     if (R.isError(res)) {
         return R.Error(normalizeError(res._0));
     }
-    const parsed = trackSchema.safeParse(res._0.data);
+    const parsed = trackSchemaWithAudioFile.safeParse(res._0.data);
 
     return parsed.success
         ? R.Ok(parsed.data)
@@ -128,7 +138,7 @@ export async function uploadTrackFile(
 
 export async function deleteTrackFile(
     id: string
-): Promise<Result<Track, Error>> {
+): Promise<Result<TrackWithoutAudioFile, Error>> {
     const res = await R.fromPromise(
         api.delete(API_ROUTES.DELETE_TRACK_FILE(id))
     );
@@ -137,7 +147,7 @@ export async function deleteTrackFile(
         return R.Error(normalizeError(res._0));
     }
 
-    const parsed = trackSchema.safeParse(res._0.data);
+    const parsed = trackSchemaWithoutAudioFile.safeParse(res._0.data);
 
     return parsed.success
         ? R.Ok(parsed.data)
