@@ -1,13 +1,6 @@
 import { ChangeEvent, useState } from "react";
 import { R, pipe } from "@mobily/ts-belt";
 import { Track } from "../types";
-import { deleteTrackFile, uploadTrackFile } from "../api/tracks";
-
-import { useTrackList } from "../context/track-list-context";
-import { useToast } from "../hooks/useToast";
-
-import Loader from "../ui/Loader";
-import Modal from "../ui/Modal";
 import {
     FILE_ERRORS,
     FILE_MAX_SIZE,
@@ -15,6 +8,14 @@ import {
     TOAST_MESSAGES,
     VALID_FILE_TYPE,
 } from "../constants";
+import { logError } from "../utils/utils";
+import { deleteTrackFile, uploadTrackFile } from "../api/tracks";
+
+import { useTrackList } from "../context/track-list-context";
+import { useToast } from "../hooks/useToast";
+
+import Loader from "../ui/Loader";
+import Modal from "../ui/Modal";
 
 interface Props {
     isModalOpened: boolean;
@@ -64,7 +65,7 @@ export default function UploadTrackModal({
             }),
             R.tapError((err) => {
                 showToast(TOAST_MESSAGES.UPLOAD_FILE_FAIL, "error");
-                console.error("Error uploading track:", err);
+                logError(err, "Error uploading track");
             })
         );
 
@@ -90,7 +91,7 @@ export default function UploadTrackModal({
             R.tapError((err) => {
                 showToast(TOAST_MESSAGES.DELETE_FILE_FAIL, "error");
                 updateTrackInList(originalTrack);
-                console.error("Error deleting track file:", err);
+                logError(err, "Error deleting track file");
             })
         );
 

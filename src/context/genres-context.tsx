@@ -7,6 +7,7 @@ import {
 } from "react";
 import { R, pipe } from "@mobily/ts-belt";
 import { getGenres } from "../api/genres";
+import { logError } from "../utils/utils";
 
 interface GenresContextType {
     genres: string[];
@@ -30,7 +31,7 @@ export const GenresProvider = ({ children }: { children: ReactNode }) => {
                     setAllGenres(res);
                 }),
                 R.tapError((err) => {
-                    console.error("Failed to load genres:", err);
+                    logError(err, "Failed to load genres");
                 })
             );
             setIsLoadingGenres(false);

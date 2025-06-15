@@ -9,6 +9,7 @@ import { useGenres } from "../context/genres-context";
 import { useTrackList } from "../context/track-list-context";
 import { TrackFormValues } from "../types";
 import { TOAST_MESSAGES } from "../constants";
+import { logError } from "../utils/utils";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
 
 interface Props {
@@ -48,7 +49,7 @@ export default function CreateTrackModal({ isModalOpened, closeModal }: Props) {
             }),
             R.tapError((err) => {
                 showToast(TOAST_MESSAGES.CREATE_FAIL, "error");
-                console.error("Error creating track:", err);
+                logError(err, "Error creating track");
             })
         );
 

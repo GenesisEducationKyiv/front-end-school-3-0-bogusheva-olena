@@ -4,7 +4,7 @@ import { R, pipe } from "@mobily/ts-belt";
 import { Track, TrackFormValues } from "../types";
 import { TOAST_MESSAGES } from "../constants";
 import { updateTrack } from "../api/tracks";
-
+import { logError } from "../utils/utils";
 import { useTrackList } from "../context/track-list-context";
 import { useGenres } from "../context/genres-context";
 import { useToast } from "../hooks/useToast";
@@ -76,7 +76,7 @@ export default function EditTrackModal({
             R.tapError((err) => {
                 showToast(TOAST_MESSAGES.UPDATE_FAIL, "error");
                 updateTrackInList(prevTrack);
-                console.error("Error updating track:", err);
+                logError(err, "Error updating track");
             })
         );
 

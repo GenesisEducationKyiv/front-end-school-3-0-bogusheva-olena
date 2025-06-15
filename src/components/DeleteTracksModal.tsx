@@ -7,7 +7,7 @@ import { useDeleteTracks } from "../context/delete-tracks-context";
 import { useToast } from "../hooks/useToast";
 import { TRACK_DELETE_MODE, TrackDeleteMode } from "../types";
 import { QUERY_PARAMS, TOAST_MESSAGES } from "../constants";
-
+import { logError } from "../utils/utils";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
 
 import Loader from "../ui/Loader";
@@ -66,7 +66,7 @@ export default function DeleteTracksModal({
             }),
             R.tapError((err) => {
                 showToast(TOAST_MESSAGES.MULTIDELETE_FAIL, "error");
-                console.error("Error deleting tracks:", err);
+                logError(err, "Error deleting tracks");
                 if (isAllMode) updateTrackList();
             })
         );

@@ -1,59 +1,31 @@
-import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { O, pipe } from "@mobily/ts-belt";
-import {
-    GetTracksParams,
-    QueryParamsKey,
-    QueryParamsOptions,
-    SortBy,
-    SortOrder,
-} from "../types";
-import {
-    INITIAL_PAGE_LIMIT,
-    QUERY_PARAMS,
-    SORT_BY_OPTIONS,
-    SORT_ORDER_OPTIONS,
-} from "../constants";
-import {
-    getTracksParamsSchema,
-    sortBySchema,
-    sortOrderSchema,
-} from "../schemas/schemas";
+import { GetTracksParams, QueryParamsKey, QueryParamsOptions } from "../types";
+import { INITIAL_PAGE_LIMIT, QUERY_PARAMS } from "../constants";
+import { getTracksParamsSchema } from "../schemas/schemas";
+import { logError } from "../utils/utils";
+import { useSortParams } from "./useSortParams";
+import { usePaginationParams } from "./usePaginationParams";
+import { useFilterParams } from "./useFilterParams";
+import { useMemo } from "react";
 
 export function useQueryParamsController() {
     const [searchParams, setSearchParams] = useSearchParams();
+    const { sortBy, sortOrder } = useSortParams(searchParams);
+    const { page } = usePaginationParams(searchParams);
+    const { search, genre, artist } = useFilterParams(searchParams);
 
-    const filters: QueryParamsOptions = useMemo(() => {
-        const getParam = (key: QueryParamsKey, fallback = "") =>
-            O.getWithDefault(fallback)(O.fromNullable(searchParams.get(key)));
-
-        const parseSortBy = (value: string | null) =>
-            O.flatMap((v: string) =>
-                sortBySchema.safeParse(v).success ? O.Some(v as SortBy) : O.None
-            )(O.fromNullable(value));
-        const sortBy = O.getWithDefault<SortBy>(SORT_BY_OPTIONS[0])(
-            parseSortBy(searchParams.get(QUERY_PARAMS.sortBy))
-        );
-        const parseSortOrder = (value: string | null) =>
-            O.flatMap((v: string) =>
-                sortOrderSchema.safeParse(v).success
-                    ? O.Some(v as SortOrder)
-                    : O.None
-            )(O.fromNullable(value));
-
-        const sortOrder = O.getWithDefault<SortOrder>(SORT_ORDER_OPTIONS[0])(
-            parseSortOrder(searchParams.get(QUERY_PARAMS.sortOrder))
-        );
-
-        return {
-            sortBy: sortBy,
-            sortOrder: sortOrder,
-            search: getParam(QUERY_PARAMS.search),
-            genre: getParam(QUERY_PARAMS.genre),
-            artist: getParam(QUERY_PARAMS.artist),
-            page: getParam(QUERY_PARAMS.page, "1"),
-        };
-    }, [searchParams]);
+    const filters = useMemo<QueryParamsOptions>(
+        () => ({
+            sortBy,
+            sortOrder,
+            search,
+            genre,
+            artist,
+            page,
+        }),
+        [sortBy, sortOrder, search, genre, artist, page]
+    );
 
     const updateQueryParam = (
         key: QueryParamsKey,
@@ -109,7 +81,7 @@ export function useQueryParamsController() {
         const result = getTracksParamsSchema.safeParse(filtered);
 
         if (!result.success) {
-            console.error("Invalid request params", result.error.format());
+            logError(result.error, "Invalid request params");
             return {
                 page: 1,
                 limit: INITIAL_PAGE_LIMIT,

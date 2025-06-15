@@ -10,6 +10,7 @@ import { useQueryParamsController } from "../hooks/useQueryParamsController";
 
 import Loader from "../ui/Loader";
 import Modal from "../ui/Modal";
+import { logError } from "../utils/utils";
 
 interface Props {
     isModalOpened: boolean;
@@ -46,7 +47,7 @@ export default function DeleteTrackModal({
             }),
             R.tapError((err) => {
                 showToast(TOAST_MESSAGES.DELETE_FAIL, "error");
-                console.error("Error deleting track:", err);
+                logError(err, "Error deleting track");
             })
         );
 

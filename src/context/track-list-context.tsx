@@ -8,6 +8,7 @@ import {
 import { R, pipe } from "@mobily/ts-belt";
 import { Track } from "../types";
 import { getAllTracks } from "../api/tracks";
+import { logError } from "../utils/utils";
 
 interface TrackListContextType {
     tracks: Track[];
@@ -45,7 +46,7 @@ export const TrackListProvider = ({ children }: { children: ReactNode }) => {
                     setAllTracksIds(res.data.map((track) => track.id));
                 }),
                 R.tapError((err) => {
-                    console.error("Error fetching all tracks:", err);
+                    logError(err, "Error fetching all tracks");
                 })
             );
 

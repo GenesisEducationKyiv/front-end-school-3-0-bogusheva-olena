@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
 import { R, pipe } from "@mobily/ts-belt";
 import { QUERY_PARAMS, TOAST_MESSAGES } from "../constants";
+import { logError } from "../utils/utils";
 import { getTracks } from "../api/tracks";
 
 import { useTrackList } from "../context/track-list-context";
@@ -45,7 +46,7 @@ export default function TracksList({ totalPages, setTotalPages }: Props) {
                         setTotalPages(res.meta.totalPages);
                     }),
                     R.tapError((err) => {
-                        console.error("Error fetching tracks:", err);
+                        logError(err, "Error fetching tracks");
                         showToast(TOAST_MESSAGES.FETCH_FAIL, "error");
                     })
                 );
