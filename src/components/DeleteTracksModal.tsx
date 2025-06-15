@@ -1,12 +1,14 @@
 import { Dispatch, SetStateAction, useState } from "react";
-
+import { R, pipe } from "@mobily/ts-belt";
 import { deleteTracks } from "../api/tracks";
 
 import { useTrackList } from "../context/track-list-context";
 import { useDeleteTracks } from "../context/delete-tracks-context";
 import { useToast } from "../hooks/useToast";
 import { TRACK_DELETE_MODE, TrackDeleteMode } from "../types";
-import { TOAST_MESSAGES } from "../constants";
+import { QUERY_PARAMS, TOAST_MESSAGES } from "../constants";
+import { logError } from "../utils/utils";
+import { useQueryParamsController } from "../hooks/useQueryParamsController";
 
 import Loader from "../ui/Loader";
 import Modal from "../ui/Modal";
@@ -14,16 +16,16 @@ import Modal from "../ui/Modal";
 interface Props {
     isModalOpened: boolean;
     closeModal: () => void;
-    setPage: Dispatch<SetStateAction<number>>;
     setTotalPages: Dispatch<SetStateAction<number>>;
 }
 
 export default function DeleteTracksModal({
     isModalOpened,
     closeModal,
-    setPage,
     setTotalPages,
 }: Props) {
+    const { resetAllQueryParams, updateQueryParam } =
+        useQueryParamsController();
     const [isLoading, setIsLoading] = useState(false);
     const [mode, setMode] = useState<TrackDeleteMode>(
         TRACK_DELETE_MODE.SELECTED
@@ -38,39 +40,38 @@ export default function DeleteTracksModal({
         useDeleteTracks();
     const { showToast } = useToast();
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         setIsLoading(true);
         const tracksToDelete = isSelectedMode
             ? selectedToDeleteTracks
             : allTracksIds;
-        if (isAllMode) {
-            setTracks([]);
-            setPage(1);
-            setTotalPages(0);
-        }
 
-        deleteTracks(tracksToDelete)
-            .then((res) => {
-                res.match(
-                    (_) => {
-                        showToast(
-                            TOAST_MESSAGES.MULTIDELETE_SUCCESS,
-                            "success"
-                        );
-                        updateTrackList();
-                        setSelectedToDeleteTracks([]);
-                        closeModal();
-                    },
-                    (error) => {
-                        showToast(TOAST_MESSAGES.MULTIDELETE_FAIL, "error");
-                        console.error("Error deleting tracks:", error);
-                        if (isAllMode) updateTrackList();
-                    },
-                );
+        const res = await deleteTracks(tracksToDelete);
+        pipe(
+            res,
+            R.tap((_) => {
+                showToast(TOAST_MESSAGES.MULTIDELETE_SUCCESS, "success");
+                if (isAllMode) {
+                    setTracks([]);
+                    resetAllQueryParams();
+                    setTotalPages(0);
+                } else {
+                    updateTrackList();
+                    updateQueryParam(QUERY_PARAMS.page, "1", {
+                        resetPage: false,
+                    });
+                }
+                setSelectedToDeleteTracks([]);
+                closeModal();
+            }),
+            R.tapError((err) => {
+                showToast(TOAST_MESSAGES.MULTIDELETE_FAIL, "error");
+                logError(err, "Error deleting tracks");
+                if (isAllMode) updateTrackList();
             })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        );
+
+        setIsLoading(false);
     };
 
     const handleClearSelected = () => {

@@ -5,7 +5,9 @@ import {
     ReactNode,
     useEffect,
 } from "react";
+import { R, pipe } from "@mobily/ts-belt";
 import { getGenres } from "../api/genres";
+import { logError } from "../utils/utils";
 
 interface GenresContextType {
     genres: string[];
@@ -19,21 +21,23 @@ export const GenresProvider = ({ children }: { children: ReactNode }) => {
     const [isLoadingGenres, setIsLoadingGenres] = useState(true);
 
     useEffect(() => {
-        setIsLoadingGenres(true);
-        getGenres()
-            .then((res) => {
-                res.match(
-                    (res) => {
-                        setAllGenres(res);
-                    },
-                    (error) => {
-                        console.error("Failed to load genres:", error);
-                    },
-                );
-            })
-            .finally(() => {
-                setIsLoadingGenres(false);
-            });
+        const fetchGenres = async () => {
+            setIsLoadingGenres(true);
+
+            const res = await getGenres();
+            pipe(
+                res,
+                R.tap((res) => {
+                    setAllGenres(res);
+                }),
+                R.tapError((err) => {
+                    logError(err, "Failed to load genres");
+                })
+            );
+            setIsLoadingGenres(false);
+        };
+
+        void fetchGenres();
     }, []);
 
     return (

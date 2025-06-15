@@ -1,13 +1,6 @@
 import { ChangeEvent, useState } from "react";
-
+import { R, pipe } from "@mobily/ts-belt";
 import { Track } from "../types";
-import { deleteTrackFile, uploadTrackFile } from "../api/tracks";
-
-import { useTrackList } from "../context/track-list-context";
-import { useToast } from "../hooks/useToast";
-
-import Loader from "../ui/Loader";
-import Modal from "../ui/Modal";
 import {
     FILE_ERRORS,
     FILE_MAX_SIZE,
@@ -15,6 +8,14 @@ import {
     TOAST_MESSAGES,
     VALID_FILE_TYPE,
 } from "../constants";
+import { logError } from "../utils/utils";
+import { deleteTrackFile, uploadTrackFile } from "../api/tracks";
+
+import { useTrackList } from "../context/track-list-context";
+import { useToast } from "../hooks/useToast";
+
+import Loader from "../ui/Loader";
+import Modal from "../ui/Modal";
 
 interface Props {
     isModalOpened: boolean;
@@ -53,55 +54,48 @@ export default function UploadTrackModal({
 
         setIsLoading(true);
 
-        uploadTrackFile(track.id, file)
-            .then((res) => {
-                res.match(
-                    () => {
-                        showToast(
-                            TOAST_MESSAGES.UPLOAD_FILE_SUCCESS,
-                            "success"
-                        );
-                        updateTrackList();
-                        closeModal();
-                    },
-                    (error) => {
-                        showToast(TOAST_MESSAGES.UPLOAD_FILE_FAIL, "error");
-                        console.error("Error uploading track:", error);
-                    },
-                );
+        const res = await uploadTrackFile(track.id, file);
+
+        pipe(
+            res,
+            R.tap((_) => {
+                showToast(TOAST_MESSAGES.UPLOAD_FILE_SUCCESS, "success");
+                updateTrackList();
+                closeModal();
+            }),
+            R.tapError((err) => {
+                showToast(TOAST_MESSAGES.UPLOAD_FILE_FAIL, "error");
+                logError(err, "Error uploading track");
             })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        );
+
+        setIsLoading(false);
     };
 
     const originalTrack = { ...track };
 
-    const handleDeleteFile = () => {
+    const handleDeleteFile = async () => {
         setIsLoading(true);
 
-        updateTrackInList({ ...track, audioFile: null });
+        const { audioFile, ...rest } = track;
+        updateTrackInList(rest);
 
-        deleteTrackFile(track.id)
-            .then((res) => {
-                res.match(
-                    () => {
-                        showToast(
-                            TOAST_MESSAGES.DELETE_FILE_SUCCESS,
-                            "success"
-                        );
-                        closeModal();
-                    },
-                    (error) => {
-                        showToast(TOAST_MESSAGES.DELETE_FILE_FAIL, "error");
-                        updateTrackInList(originalTrack);
-                        console.error("Error deleting track file:", error);
-                    },
-                );
+        const res = await deleteTrackFile(track.id);
+
+        pipe(
+            res,
+            R.tap((_) => {
+                showToast(TOAST_MESSAGES.DELETE_FILE_SUCCESS, "success");
+                closeModal();
+            }),
+            R.tapError((err) => {
+                showToast(TOAST_MESSAGES.DELETE_FILE_FAIL, "error");
+                updateTrackInList(originalTrack);
+                logError(err, "Error deleting track file");
             })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        );
+
+        setIsLoading(false);
     };
 
     return (

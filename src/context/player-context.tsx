@@ -8,6 +8,7 @@ import {
 } from "react";
 import { Track } from "../types";
 import { FILE_PATH } from "../constants";
+import { logError } from "../utils/utils";
 
 interface AudioPlayerContextType {
     playTrack: (track: Track) => void;
@@ -60,7 +61,7 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
     const playTrack = (track: Track) => {
         if (!audioRef.current) return;
         if (!track.audioFile) {
-            console.error("No audio file provided for this track");
+            logError("No audio file provided for this track", `Track ID: ${track.id}`);
             return;
         }
 
@@ -82,9 +83,9 @@ export const AudioPlayerProvider = ({ children }: { children: ReactNode }) => {
             })
             .catch((error) => {
                 if (error.name === "NotAllowedError") {
-                    console.error("Playback was prevented by browser");
+                    logError("Playback was prevented by browser", `Track ID: ${track.id}`);
                 } else {
-                    console.error("Error playing audio:", error);
+                    logError(error, "Error playing audio");
                 }
                 setIsPlaying(false);
             });

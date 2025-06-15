@@ -1,17 +1,21 @@
 import z from "zod";
 import { genresResponseSchema } from "../schemas/schemas";
-import { Result, ok, err } from "neverthrow";
+import { R } from "@mobily/ts-belt";
 import { api } from "./axios";
 import { API_ROUTES } from "../constants";
 import { normalizeError } from "../utils/utils";
 
 export const getGenres = async (): Promise<
-    Result<z.infer<typeof genresResponseSchema>, Error>
+    R.Result<z.infer<typeof genresResponseSchema>, Error>
 > => {
-    try {
-        const res = await api.get(API_ROUTES.GENRES);
-        return ok(genresResponseSchema.parse(res.data));
-    } catch (e) {
-        return err(normalizeError(e));
+    const result = await R.fromPromise(api.get(API_ROUTES.GENRES));
+    if (R.isError(result)) {
+        return R.Error(normalizeError(result._0));
     }
+
+    const parsed = genresResponseSchema.safeParse(result._0.data);
+
+    return parsed.success
+        ? R.Ok(parsed.data)
+        : R.Error(new Error("Invalid genre data"));
 };
