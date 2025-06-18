@@ -1,14 +1,16 @@
 import { useState } from "react";
-
+import { R, pipe } from "@mobily/ts-belt";
 import { deleteTrack } from "../api/tracks";
 import { Track } from "../types";
-import { TOAST_MESSAGES } from "../constants";
+import { QUERY_PARAMS, TOAST_MESSAGES } from "../constants";
 import { useTrackList } from "../context/track-list-context";
 import { useDeleteTracks } from "../context/delete-tracks-context";
 import { useToast } from "../hooks/useToast";
+import { useQueryParamsController } from "../hooks/useQueryParamsController";
 
 import Loader from "../ui/Loader";
 import Modal from "../ui/Modal";
+import { logError } from "../utils/utils";
 
 interface Props {
     isModalOpened: boolean;
@@ -22,36 +24,35 @@ export default function DeleteTrackModal({
     track,
 }: Props) {
     const [isLoading, setIsLoading] = useState(false);
-
+    const { updateQueryParam } = useQueryParamsController();
     const { removeTrackFromList, updateTrackList } = useTrackList();
     const { setSelectedToDeleteTracks } = useDeleteTracks();
     const { showToast } = useToast();
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         setIsLoading(true);
 
         removeTrackFromList(track.id);
 
-        deleteTrack(track.id)
-            .then((res) => {
-                res.match(
-                    (_) => {
-                        showToast(TOAST_MESSAGES.DELETE_SUCCESS, "success");
-                        setSelectedToDeleteTracks((prev) =>
-                            prev.filter((id) => id !== track.id)
-                        );
-                        closeModal();
-                    },
-                    (error) => {
-                        showToast(TOAST_MESSAGES.DELETE_FAIL, "error");
-                        console.error("Error deleting track:", error);
-                    },
+        const res = await deleteTrack(track.id);
+        pipe(
+            res,
+            R.tap((_) => {
+                showToast(TOAST_MESSAGES.DELETE_SUCCESS, "success");
+                setSelectedToDeleteTracks((prev) =>
+                    prev.filter((id) => id !== track.id)
                 );
+                updateQueryParam(QUERY_PARAMS.page, "1", { resetPage: false });
+                closeModal();
+            }),
+            R.tapError((err) => {
+                showToast(TOAST_MESSAGES.DELETE_FAIL, "error");
+                logError(err, "Error deleting track");
             })
-            .finally(() => {
-                updateTrackList();
-                setIsLoading(false);
-            });
+        );
+
+        updateTrackList();
+        setIsLoading(false);
     };
 
     return (

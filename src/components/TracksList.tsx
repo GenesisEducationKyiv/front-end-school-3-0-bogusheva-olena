@@ -1,32 +1,28 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
-
-import { FilterOptions } from "../types";
-import { TOAST_MESSAGES } from "../constants";
+import { R, pipe } from "@mobily/ts-belt";
+import { QUERY_PARAMS, TOAST_MESSAGES } from "../constants";
+import { logError } from "../utils/utils";
 import { getTracks } from "../api/tracks";
-import { buildQueryParams } from "../utils/utils";
 
 import { useTrackList } from "../context/track-list-context";
 import { useToast } from "../hooks/useToast";
+import { useQueryParamsController } from "../hooks/useQueryParamsController";
 
 import TrackItem from "./TrackItem";
 import Loader from "../ui/Loader";
 import Pagination from "../ui/Pagination";
 
 interface Props {
-    filters: FilterOptions;
-    page: number;
     totalPages: number;
-    setPage: Dispatch<SetStateAction<number>>;
     setTotalPages: Dispatch<SetStateAction<number>>;
 }
 
-export default function TracksList({
-    filters,
-    page,
-    totalPages,
-    setPage,
-    setTotalPages,
-}: Props) {
+export default function TracksList({ totalPages, setTotalPages }: Props) {
+    const { filters, updateQueryParam, requestTracksParams } =
+        useQueryParamsController();
+
+    const currentPage = Number(filters.page) || 1;
+
     const {
         tracks,
         setTracks,
@@ -38,35 +34,40 @@ export default function TracksList({
 
     useEffect(
         () => {
-            setIsLoadingTracks(true);
+            const fetchTracks = async () => {
+                setIsLoadingTracks(true);
 
-            const queryParams = buildQueryParams(filters, page);
+                const res = await getTracks(requestTracksParams);
 
-            getTracks(queryParams)
-                .then((res) => {
-                    res.match(
-                        (res) => {
-                            setTracks(res.data);
-                            setTotalPages(res.meta.totalPages);
-                        },
-                        (error) => {
-                            console.error("Error fetching tracks:", error);
-                            showToast(TOAST_MESSAGES.FETCH_FAIL, "error");
-                        },
-                    );
-                })
-                .finally(() => setIsLoadingTracks(false));
+                pipe(
+                    res,
+                    R.tap((res) => {
+                        setTracks(res.data);
+                        setTotalPages(res.meta.totalPages);
+                    }),
+                    R.tapError((err) => {
+                        logError(err, "Error fetching tracks");
+                        showToast(TOAST_MESSAGES.FETCH_FAIL, "error");
+                    })
+                );
+
+                setIsLoadingTracks(false);
+            };
+
+            void fetchTracks();
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [filters, page, updateCounter],
+        [filters, updateCounter]
     );
 
     const handlePrevPage = () => {
-        if (page > 1) setPage((prev) => prev - 1);
+        if (currentPage > 1)
+            updateQueryParam(QUERY_PARAMS.page, String(currentPage - 1));
     };
 
     const handleNextPage = () => {
-        if (page < totalPages) setPage((prev) => prev + 1);
+        if (currentPage < totalPages)
+            updateQueryParam(QUERY_PARAMS.page, String(currentPage + 1));
     };
 
     if (!isLoadingTracks && !tracks.length)
@@ -90,7 +91,7 @@ export default function TracksList({
             </ul>
             {totalPages > 1 && (
                 <Pagination
-                    page={page}
+                    page={currentPage}
                     totalPages={totalPages}
                     handlePrevPage={handlePrevPage}
                     handleNextPage={handleNextPage}
