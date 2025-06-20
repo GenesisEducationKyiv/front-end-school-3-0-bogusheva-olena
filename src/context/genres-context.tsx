@@ -14,7 +14,9 @@ interface GenresContextType {
     isLoadingGenres: boolean;
 }
 
-const GenresContext = createContext<GenresContextType | undefined>(undefined);
+export const GenresContext = createContext<GenresContextType | undefined>(
+    undefined
+);
 
 export const GenresProvider = ({ children }: { children: ReactNode }) => {
     const [genres, setAllGenres] = useState<string[]>([]);

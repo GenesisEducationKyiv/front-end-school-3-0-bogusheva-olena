@@ -6,6 +6,12 @@
         "lib": ["ES2020", "DOM", "DOM.Iterable"],
         "module": "ESNext",
         "skipLibCheck": true,
+        "types": [
+            "node",
+            "vitest",
+            "@testing-library/jest-dom",
+            "@playwright/experimental-ct-react"
+        ],
 
         /* Bundler mode */
         "moduleResolution": "bundler",
@@ -26,5 +32,5 @@
         "noPropertyAccessFromIndexSignature": true,
         "exactOptionalPropertyTypes": true
     },
-    "include": ["src"]
+    "include": ["src", "int-tests", "svg.d.ts"]
 }

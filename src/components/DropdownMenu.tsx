@@ -2,9 +2,9 @@ import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 
 import { Track } from "../types";
 
-import EditIcon from "../assets/icons/edit.svg?react";
-import DeleteIcon from "../assets/icons/delete.svg?react";
-import UploadIcon from "../assets/icons/upload.svg?react";
+import EditIcon from "../ui/EditIcon";
+import DeleteIcon from "../ui/DeleteIcon";
+import UploadIcon from "../ui/UploadIcon";
 
 interface Props {
     track: Track;
@@ -14,7 +14,13 @@ interface Props {
     openUploadModal: () => void;
 }
 
-export default function DropdownMenu({ track, setShowMenu, openEditModal, openDeleteModal, openUploadModal }: Props) {
+export default function DropdownMenu({
+    track,
+    setShowMenu,
+    openEditModal,
+    openDeleteModal,
+    openUploadModal,
+}: Props) {
     const id = track.id;
 
     const ref = useRef<HTMLDivElement>(null);
@@ -32,7 +38,10 @@ export default function DropdownMenu({ track, setShowMenu, openEditModal, openDe
     }, [setShowMenu]);
 
     return (
-        <div ref={ref} className="absolute right-0 top-0 p-1 space-y-1 border rounded shadow bg-gray-50 z-10 text-sm">
+        <div
+            ref={ref}
+            className="absolute right-0 top-0 p-1 space-y-1 border rounded shadow bg-gray-50 z-10 text-sm"
+        >
             <button
                 type="button"
                 onClick={() => {

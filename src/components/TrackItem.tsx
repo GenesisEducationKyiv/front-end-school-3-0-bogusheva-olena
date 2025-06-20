@@ -60,7 +60,7 @@ const TrackItem = ({ track }: Props) => {
     const toggleChecked = () => {
         if (checked) {
             setSelectedToDeleteTracks((prev) =>
-                prev.filter((trackId) => trackId !== id),
+                prev.filter((trackId) => trackId !== id)
             );
         } else {
             setSelectedToDeleteTracks((prev) => [...prev, id]);
@@ -105,6 +105,7 @@ const TrackItem = ({ track }: Props) => {
                                 className="border rounded p-1 text-sm hover:bg-gray-100"
                                 onClick={() => setIsMenuShown((prev) => !prev)}
                                 aria-label="Track options"
+                                data-testid={`track-item-${id}-options-button`}
                             >
                                 <MenuIcon className="w-4 h-4" />
                             </button>
