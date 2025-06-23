@@ -5,7 +5,7 @@ import { Track, TrackFormValues } from "../types";
 import { TOAST_MESSAGES } from "../constants";
 import { updateTrack } from "../api/tracks";
 import { logError } from "../utils/utils";
-import { useTrackList } from "../context/track-list-context";
+import { useTrackStore } from "../store/track-store";
 import { useGenres } from "../context/genres-context";
 import { useToast } from "../hooks/useToast";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
@@ -26,7 +26,7 @@ export default function EditTrackModal({
 }: Props) {
     const [isLoading, setIsLoading] = useState(false);
 
-    const { updateTrackInList } = useTrackList();
+    const { updateTrackInList } = useTrackStore();
     const { showToast } = useToast();
     const { genres, isLoadingGenres } = useGenres();
     const { filters, resetAllQueryParams } = useQueryParamsController();
@@ -56,14 +56,14 @@ export default function EditTrackModal({
 
         updateTrackInList(updatedTrack);
 
-        const res = await updateTrack(
-            track.id,
-            values.title,
-            values.artist,
-            values.album ?? "",
-            values.genres,
-            values.coverImage ?? ""
-        );
+        const res = await updateTrack({
+            id: track.id,
+            title: values.title,
+            artist: values.artist,
+            album: values.album ?? "",
+            genres: values.genres,
+            coverImage: values.coverImage ?? "",
+        });
         pipe(
             res,
             R.tap((_) => {

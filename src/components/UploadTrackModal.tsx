@@ -9,9 +9,11 @@ import {
     VALID_FILE_TYPE,
 } from "../constants";
 import { logError } from "../utils/utils";
-import { deleteTrackFile, uploadTrackFile } from "../api/tracks";
 
-import { useTrackList } from "../context/track-list-context";
+import { useTrackStore } from "../store/track-store";
+
+import { useUploadTrackFileMutation } from "../hooks/useUploadTrackFileMutation";
+import { useDeleteTrackFileMutation } from "../hooks/useDeleteTrackFileMutation";
 import { useToast } from "../hooks/useToast";
 
 import Loader from "../ui/Loader";
@@ -29,11 +31,19 @@ export default function UploadTrackModal({
     track,
 }: Props) {
     const [file, setFile] = useState<File | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const { updateTrackList, updateTrackInList } = useTrackList();
+    const { updateTrackInList } = useTrackStore();
     const { showToast } = useToast();
+
+    const {
+        mutateAsync: mutateAsyncUploadFile,
+        isPending: isPendingUploadFile,
+    } = useUploadTrackFileMutation();
+    const {
+        mutateAsync: mutateAsyncDeleteFile,
+        isPending: isPendingDeleteFile,
+    } = useDeleteTrackFileMutation();
 
     const handleChangeFile = (e: ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
@@ -52,15 +62,12 @@ export default function UploadTrackModal({
     const handleUploadFile = async () => {
         if (!file) return;
 
-        setIsLoading(true);
-
-        const res = await uploadTrackFile(track.id, file);
+        const res = await mutateAsyncUploadFile({ id: track.id, file });
 
         pipe(
             res,
             R.tap((_) => {
                 showToast(TOAST_MESSAGES.UPLOAD_FILE_SUCCESS, "success");
-                updateTrackList();
                 closeModal();
             }),
             R.tapError((err) => {
@@ -68,19 +75,14 @@ export default function UploadTrackModal({
                 logError(err, "Error uploading track");
             })
         );
-
-        setIsLoading(false);
     };
 
-    const originalTrack = { ...track };
-
     const handleDeleteFile = async () => {
-        setIsLoading(true);
-
+        const originalTrack = { ...track };
         const { audioFile, ...rest } = track;
         updateTrackInList(rest);
 
-        const res = await deleteTrackFile(track.id);
+        const res = await mutateAsyncDeleteFile(track.id);
 
         pipe(
             res,
@@ -94,9 +96,9 @@ export default function UploadTrackModal({
                 logError(err, "Error deleting track file");
             })
         );
-
-        setIsLoading(false);
     };
+
+    const isBusy = isPendingUploadFile || isPendingDeleteFile;
 
     return (
         <Modal
@@ -128,7 +130,7 @@ export default function UploadTrackModal({
                         accept="audio/*"
                         onChange={handleChangeFile}
                         className="block mt-4"
-                        disabled={isLoading}
+                        disabled={isBusy}
                     />
                 )}
                 {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -138,27 +140,27 @@ export default function UploadTrackModal({
                     <button
                         type="submit"
                         onClick={handleDeleteFile}
-                        disabled={isLoading}
-                        aria-disabled={isLoading}
-                        data-loading={isLoading || undefined}
+                        disabled={isBusy}
+                        aria-disabled={isBusy}
+                        data-loading={isBusy || undefined}
                         className="flex bg-red-600 text-white px-4 py-2 rounded hover:bg-green-700"
                     >
-                        {isLoading && (
+                        {isPendingDeleteFile && (
                             <Loader className="mr-2 [&>*]:fill-white" />
                         )}
-                        {isLoading ? "Removing..." : "Remove file"}
+                        {isPendingDeleteFile ? "Removing..." : "Remove file"}
                     </button>
                 ) : (
                     <button
                         type="submit"
-                        disabled={isLoading}
-                        aria-disabled={isLoading}
-                        data-loading={isLoading || undefined}
+                        disabled={isBusy}
+                        aria-disabled={isBusy}
+                        data-loading={isBusy || undefined}
                         className="flex bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                         data-testid="track-modal-upload-button"
                         onClick={handleUploadFile}
                     >
-                        {isLoading && (
+                        {isPendingUploadFile && (
                             <Loader className="mr-2 [&>*]:fill-white" />
                         )}
                         Upload

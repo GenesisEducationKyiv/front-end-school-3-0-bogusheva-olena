@@ -27,13 +27,13 @@ describe("test createTrack function (white-box)", () => {
             data: mockResponseTrack,
         });
 
-        const result = await createTrack(
-            mockResponseTrack.title,
-            mockResponseTrack.artist,
-            mockResponseTrack.album,
-            mockResponseTrack.genres,
-            mockResponseTrack.coverImage
-        );
+        const result = await createTrack({
+            title: mockResponseTrack.title,
+            artist: mockResponseTrack.artist,
+            album: mockResponseTrack.album,
+            genres: mockResponseTrack.genres,
+            coverImage: mockResponseTrack.coverImage,
+        });
 
         expect(R.isOk(result)).toBe(true);
         if (R.isOk(result)) {
@@ -44,7 +44,7 @@ describe("test createTrack function (white-box)", () => {
     it("returns Error if API fails", async () => {
         (api.post as Mock).mockRejectedValueOnce(new Error("API error"));
 
-        const result = await createTrack("t", "a");
+        const result = await createTrack({ title: "t", artist: "a" });
 
         expect(R.isError(result)).toBe(true);
         if (R.isError(result)) {

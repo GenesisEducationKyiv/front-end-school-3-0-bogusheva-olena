@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Track } from "../types";
 
 import { useModal } from "../hooks/useModal";
-import { useDeleteTracks } from "../context/delete-tracks-context";
+import { useDeleteTracksStore } from "../store/delete-tracks-store";
 import { useAudioPlayer } from "../context/player-context";
 
 import UploadTrackModal from "./UploadTrackModal";
@@ -39,8 +39,8 @@ const TrackItem = ({ track }: Props) => {
         closeModal: closeUploadModal,
         isModalOpened: isUploadModalOpened,
     } = useModal();
-    const { selectedToDeleteTracks, setSelectedToDeleteTracks } =
-        useDeleteTracks();
+    const { selectedToDeleteTracks, addToSelected, removeFromSelected } =
+        useDeleteTracksStore();
     const { playTrack, pauseTrack, isPlaying, currentTrackId } =
         useAudioPlayer();
 
@@ -59,11 +59,9 @@ const TrackItem = ({ track }: Props) => {
 
     const toggleChecked = () => {
         if (checked) {
-            setSelectedToDeleteTracks((prev) =>
-                prev.filter((trackId) => trackId !== id)
-            );
+            removeFromSelected(id);
         } else {
-            setSelectedToDeleteTracks((prev) => [...prev, id]);
+            addToSelected(id);
         }
     };
 

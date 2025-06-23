@@ -2,12 +2,10 @@ import { Dispatch, SetStateAction, useEffect } from "react";
 import { R, pipe } from "@mobily/ts-belt";
 import { QUERY_PARAMS, TOAST_MESSAGES } from "../constants";
 import { logError } from "../utils/utils";
-import { getTracks } from "../api/tracks";
-
-import { useTrackList } from "../context/track-list-context";
+import { useTrackStore } from "../store/track-store";
 import { useToast } from "../hooks/useToast";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
-
+import { useTracksQuery } from "../hooks/useTracksQuery";
 import TrackItem from "./TrackItem";
 import Loader from "../ui/Loader";
 import Pagination from "../ui/Pagination";
@@ -23,22 +21,15 @@ export default function TracksList({ totalPages, setTotalPages }: Props) {
 
     const currentPage = Number(filters.page) || 1;
 
-    const {
-        tracks,
-        setTracks,
-        updateCounter,
-        isLoadingTracks,
-        setIsLoadingTracks,
-    } = useTrackList();
+    const { tracks, setTracks } = useTrackStore();
     const { showToast } = useToast();
+
+    const { data: res, isLoading: isLoadingTracks } =
+        useTracksQuery(requestTracksParams);
 
     useEffect(
         () => {
-            const fetchTracks = async () => {
-                setIsLoadingTracks(true);
-
-                const res = await getTracks(requestTracksParams);
-
+            if (res) {
                 pipe(
                     res,
                     R.tap((res) => {
@@ -50,14 +41,10 @@ export default function TracksList({ totalPages, setTotalPages }: Props) {
                         showToast(TOAST_MESSAGES.FETCH_FAIL, "error");
                     })
                 );
-
-                setIsLoadingTracks(false);
-            };
-
-            void fetchTracks();
+            }
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [filters, updateCounter]
+        [res]
     );
 
     const handlePrevPage = () => {

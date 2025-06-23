@@ -6,8 +6,8 @@ import {
     useEffect,
 } from "react";
 import { R, pipe } from "@mobily/ts-belt";
-import { getGenres } from "../api/genres";
 import { logError } from "../utils/utils";
+import { useGenresQuery } from "../hooks/useGenresQuery";
 
 interface GenresContextType {
     genres: string[];
@@ -19,28 +19,21 @@ export const GenresContext = createContext<GenresContextType | undefined>(
 );
 
 export const GenresProvider = ({ children }: { children: ReactNode }) => {
-    const [genres, setAllGenres] = useState<string[]>([]);
-    const [isLoadingGenres, setIsLoadingGenres] = useState(true);
-
+    const [genres, setGenres] = useState<string[]>([]);
+    const { data: res, isLoading: isLoadingGenres } = useGenresQuery();
     useEffect(() => {
-        const fetchGenres = async () => {
-            setIsLoadingGenres(true);
+        if (!res) return;
 
-            const res = await getGenres();
-            pipe(
-                res,
-                R.tap((res) => {
-                    setAllGenres(res);
-                }),
-                R.tapError((err) => {
-                    logError(err, "Failed to load genres");
-                })
-            );
-            setIsLoadingGenres(false);
-        };
-
-        void fetchGenres();
-    }, []);
+        pipe(
+            res,
+            R.tap((data) => {
+                setGenres(data);
+            }),
+            R.tapError((err) => {
+                logError(err, "Failed to load genres");
+            })
+        );
+    }, [res]);
 
     return (
         <GenresContext.Provider
