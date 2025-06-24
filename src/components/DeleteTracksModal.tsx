@@ -3,11 +3,17 @@ import { useQueryClient } from "@tanstack/react-query";
 import { R, pipe } from "@mobily/ts-belt";
 
 import { TRACK_DELETE_MODE, TrackDeleteMode } from "../types";
-import { QUERY_PARAMS, TOAST_MESSAGES } from "../constants";
+import { QUERY_PARAMS, QUERYKEY, TOAST_MESSAGES } from "../constants";
 import { logError } from "../utils/utils";
 
 import { useDeleteTracksStore } from "../store/delete-tracks-store";
 import { useTrackStore } from "../store/track-store";
+import {
+    selectAllTracksIds,
+    selectSelectedToDeleteTracks,
+    selectSetSelectedToDeleteTracks,
+    selectSetTracks,
+} from "../store/selectors";
 import { useAllTracksQuery } from "../hooks/useAllTracksQuery";
 import { useToast } from "../hooks/useToast";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
@@ -37,10 +43,16 @@ export default function DeleteTracksModal({
     const isSelectedMode = mode === TRACK_DELETE_MODE.SELECTED;
     const isAllMode = mode === TRACK_DELETE_MODE.ALL;
 
-    const { setTracks, allTracksIds } = useTrackStore();
+    const setTracks = useTrackStore(selectSetTracks);
+    const allTracksIds = useTrackStore(selectAllTracksIds);
+
     const { isLoading: isLoadingAllTracks } = useAllTracksQuery();
-    const { selectedToDeleteTracks, setSelectedToDeleteTracks } =
-        useDeleteTracksStore();
+    const selectedToDeleteTracks = useDeleteTracksStore(
+        selectSelectedToDeleteTracks
+    );
+    const setSelectedToDeleteTracks = useDeleteTracksStore(
+        selectSetSelectedToDeleteTracks
+    );
     const { showToast } = useToast();
     const { mutateAsync, isPending } = useDeleteTracksMutation();
 
@@ -59,7 +71,9 @@ export default function DeleteTracksModal({
                     resetAllQueryParams();
                     setTotalPages(0);
                 } else {
-                    queryClient.invalidateQueries({ queryKey: ["tracks"] });
+                    queryClient.invalidateQueries({
+                        queryKey: [QUERYKEY.TRACKS],
+                    });
                     updateQueryParam(QUERY_PARAMS.page, "1", {
                         resetPage: false,
                     });
@@ -71,7 +85,9 @@ export default function DeleteTracksModal({
                 showToast(TOAST_MESSAGES.MULTIDELETE_FAIL, "error");
                 logError(err, "Error deleting tracks");
                 if (isAllMode)
-                    queryClient.invalidateQueries({ queryKey: ["tracks"] });
+                    queryClient.invalidateQueries({
+                        queryKey: [QUERYKEY.TRACKS],
+                    });
             })
         );
     };

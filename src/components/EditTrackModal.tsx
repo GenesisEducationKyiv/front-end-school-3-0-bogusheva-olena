@@ -6,6 +6,7 @@ import { TOAST_MESSAGES } from "../constants";
 import { updateTrack } from "../api/tracks";
 import { logError } from "../utils/utils";
 import { useTrackStore } from "../store/track-store";
+import { selectUpdateTrackInList } from "../store/selectors";
 import { useGenres } from "../context/genres-context";
 import { useToast } from "../hooks/useToast";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
@@ -26,7 +27,7 @@ export default function EditTrackModal({
 }: Props) {
     const [isLoading, setIsLoading] = useState(false);
 
-    const { updateTrackInList } = useTrackStore();
+    const updateTrackInList = useTrackStore(selectUpdateTrackInList);
     const { showToast } = useToast();
     const { genres, isLoadingGenres } = useGenres();
     const { filters, resetAllQueryParams } = useQueryParamsController();

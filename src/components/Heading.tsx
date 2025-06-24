@@ -17,7 +17,7 @@ import {
 import { isFilterKey } from "../types";
 import { useGenres } from "../context/genres-context";
 import { useDeleteTracksStore } from "../store/delete-tracks-store";
-
+import { selectSelectedToDeleteTracks } from "../store/selectors";
 import { useTracksQuery } from "../hooks/useTracksQuery";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
 import { useModal } from "../hooks/useModal";
@@ -39,7 +39,9 @@ export default function Heading({ setTotalPages }: FiltersProps) {
 
     const [showSuggestions, setShowSuggestions] = useState(false);
 
-    const { selectedToDeleteTracks } = useDeleteTracksStore();
+    const selectedToDeleteTracks = useDeleteTracksStore(
+        selectSelectedToDeleteTracks
+    );
     const { genres, isLoadingGenres } = useGenres();
     const { isLoading: isLoadingTracks } = useTracksQuery();
     const {

@@ -3,6 +3,7 @@ import { R, pipe } from "@mobily/ts-belt";
 import { QUERY_PARAMS, TOAST_MESSAGES } from "../constants";
 import { logError } from "../utils/utils";
 import { useTrackStore } from "../store/track-store";
+import { selectSetTracks, selectTracks } from "../store/selectors";
 import { useToast } from "../hooks/useToast";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
 import { useTracksQuery } from "../hooks/useTracksQuery";
@@ -21,7 +22,8 @@ export default function TracksList({ totalPages, setTotalPages }: Props) {
 
     const currentPage = Number(filters.page) || 1;
 
-    const { tracks, setTracks } = useTrackStore();
+    const tracks = useTrackStore(selectTracks);
+    const setTracks = useTrackStore(selectSetTracks);
     const { showToast } = useToast();
 
     const { data: res, isLoading: isLoadingTracks } =

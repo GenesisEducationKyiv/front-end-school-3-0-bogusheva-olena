@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { uploadTrackFile } from "../api/tracks";
 import { Result } from "@mobily/ts-belt";
 import { TrackWithAudioFile, UploadTrackFileArgs } from "../types";
+import { QUERYKEY } from "../constants";
 
 export const useUploadTrackFileMutation = () => {
     const queryClient = useQueryClient();
@@ -13,7 +14,7 @@ export const useUploadTrackFileMutation = () => {
     >({
         mutationFn: uploadTrackFile,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["tracks"] });
+            queryClient.invalidateQueries({ queryKey: [QUERYKEY.TRACKS] });
         },
     });
 };

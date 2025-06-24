@@ -4,6 +4,11 @@ import { Track } from "../types";
 
 import { useModal } from "../hooks/useModal";
 import { useDeleteTracksStore } from "../store/delete-tracks-store";
+import {
+    selectAddToSelected,
+    selectRemoveFromSelected,
+    selectSelectedToDeleteTracks,
+} from "../store/selectors";
 import { useAudioPlayer } from "../context/player-context";
 
 import UploadTrackModal from "./UploadTrackModal";
@@ -39,8 +44,13 @@ const TrackItem = ({ track }: Props) => {
         closeModal: closeUploadModal,
         isModalOpened: isUploadModalOpened,
     } = useModal();
-    const { selectedToDeleteTracks, addToSelected, removeFromSelected } =
-        useDeleteTracksStore();
+
+    const selectedToDeleteTracks = useDeleteTracksStore(
+        selectSelectedToDeleteTracks
+    );
+    const addToSelected = useDeleteTracksStore(selectAddToSelected);
+    const removeFromSelected = useDeleteTracksStore(selectRemoveFromSelected);
+
     const { playTrack, pauseTrack, isPlaying, currentTrackId } =
         useAudioPlayer();
 
