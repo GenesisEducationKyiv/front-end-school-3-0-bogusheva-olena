@@ -9,6 +9,7 @@ export * from "./query-key";
 export const INITIAL_PAGE_LIMIT = 5;
 
 export const BASE_URL = "http://localhost:8000/api";
+export const WS_BASE_URL = "ws://localhost:8080";
 
 export const COLLECTION_TRACKS_LIMIT = 1000000;
 

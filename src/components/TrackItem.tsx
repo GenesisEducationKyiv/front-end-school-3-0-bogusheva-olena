@@ -24,9 +24,10 @@ import CollectionIcon from "../assets/icons/archive.svg?react";
 
 interface Props {
     track: Track;
+    styling: "default" | "streaming";
 }
 
-const TrackItem = ({ track }: Props) => {
+const TrackItem = ({ track, styling = "default" }: Props) => {
     const id = track.id;
 
     const {
@@ -75,11 +76,19 @@ const TrackItem = ({ track }: Props) => {
         }
     };
 
+    const isStreamingTrack = styling === "streaming";
+
     return (
         <>
             <li
-                className="relative border rounded flex-grow"
-                data-testid={`track-item-${id}`}
+                className={`relative border rounded flex-grow list-none ${
+                    isStreamingTrack
+                        ? "border-green-600 pb-1 lg:max-w-[70%] mx-auto"
+                        : ""
+                }`}
+                data-testid={
+                    isStreamingTrack ? "streaming-track" : `track-item-${id}`
+                }
             >
                 <div className="flex items-center justify-end">
                     {track.album && (
@@ -90,56 +99,64 @@ const TrackItem = ({ track }: Props) => {
                             {track.album}
                         </div>
                     )}
-                    <div className="md:absolute top-0 right-0 m-2 flex gap-x-1.5 justify-end flex-grow">
-                        <div className="relative" onClick={toggleChecked}>
-                            <CollectionIcon
-                                className={`w-[26px] h-[26px] cursor-pointer ${
-                                    checked
-                                        ? "[&>*]:fill-red-600"
-                                        : "[&>*]:fill-green-600"
-                                }`}
-                            />
-                            <input
-                                type="checkbox"
-                                className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
-                                onChange={toggleChecked}
-                                checked={checked}
-                                data-testid={`track-checkbox-${id}`}
-                            />
-                        </div>
-                        <div className="relative">
-                            <button
-                                type="button"
-                                className="border rounded p-1 text-sm hover:bg-gray-100"
-                                onClick={() => setIsMenuShown((prev) => !prev)}
-                                aria-label="Track options"
-                                data-testid={`track-item-${id}-options-button`}
-                            >
-                                <MenuIcon className="w-4 h-4" />
-                            </button>
-                            {isMenuShown && (
-                                <DropdownMenu
-                                    track={track}
-                                    setShowMenu={setIsMenuShown}
-                                    openEditModal={openEditModal}
-                                    openDeleteModal={openDeleteModal}
-                                    openUploadModal={openUploadModal}
+                    {!isStreamingTrack && (
+                        <div className="md:absolute top-0 right-0 m-2 flex gap-x-1.5 justify-end flex-grow">
+                            <div className="relative" onClick={toggleChecked}>
+                                <CollectionIcon
+                                    className={`w-[26px] h-[26px] cursor-pointer ${
+                                        checked
+                                            ? "[&>*]:fill-red-600"
+                                            : "[&>*]:fill-green-600"
+                                    }`}
                                 />
-                            )}
+                                <input
+                                    type="checkbox"
+                                    className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                                    onChange={toggleChecked}
+                                    checked={checked}
+                                    data-testid={`track-checkbox-${id}`}
+                                />
+                            </div>
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    className="border rounded p-1 text-sm hover:bg-gray-100"
+                                    onClick={() =>
+                                        setIsMenuShown((prev) => !prev)
+                                    }
+                                    aria-label="Track options"
+                                    data-testid={`track-item-${id}-options-button`}
+                                >
+                                    <MenuIcon className="w-4 h-4" />
+                                </button>
+                                {isMenuShown && (
+                                    <DropdownMenu
+                                        track={track}
+                                        setShowMenu={setIsMenuShown}
+                                        openEditModal={openEditModal}
+                                        openDeleteModal={openDeleteModal}
+                                        openUploadModal={openUploadModal}
+                                    />
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
                 <div className="flex items-center px-2 pt-2 pb-1 gap-x-2 lg:gap-x-6">
                     <div className="flex flex-shrink-0 justify-between gap-x-2 items-center">
                         <img
-                            src={track.coverImage || defaultCover}
+                            src={
+                                isStreamingTrack
+                                    ? defaultCover
+                                    : track.coverImage || defaultCover
+                            }
                             alt={track.title}
                             className="w-16 h-16 rounded object-cover"
                             data-testid={`track-item-${id}-cover-image`}
                         />
                     </div>
                     <div className="h-[100%] group w-[32px]">
-                        {track.audioFile && (
+                        {track.audioFile && !isStreamingTrack && (
                             <PlayButton
                                 id={id}
                                 isPlaying={isCurrent && isPlaying}
@@ -163,7 +180,7 @@ const TrackItem = ({ track }: Props) => {
                         </p>
                     </div>
                 </div>
-                <WaveVisualizer track={track} />
+                {!isStreamingTrack && <WaveVisualizer track={track} />}
             </li>
             <EditTrackModal
                 track={track}
