@@ -1,4 +1,5 @@
 export * from "./type-guards";
+export * from "./type-store";
 
 import { z } from "zod";
 import {
@@ -43,3 +44,29 @@ export const TRACK_DELETE_MODE = {
 
 export type TrackDeleteMode =
     (typeof TRACK_DELETE_MODE)[keyof typeof TRACK_DELETE_MODE];
+
+export type CreateTrackArgs = {
+    title: string;
+    artist: string;
+    album?: string;
+    genres?: string[];
+    coverImage?: string;
+};
+
+export type UploadTrackFileArgs = {
+    id: string;
+    file: File;
+};
+
+export type UpdateTrackArgs = {
+    id: string;
+    title: string;
+    artist: string;
+    album?: string;
+    genres?: string[];
+    coverImage?: string;
+};
+
+export type DeleteTracksArgs = {
+    ids: string[];
+};

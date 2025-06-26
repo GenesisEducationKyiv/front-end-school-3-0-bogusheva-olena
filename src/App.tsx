@@ -1,9 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
-import { TrackListProvider } from "./context/track-list-context";
 import { AudioPlayerProvider } from "./context/player-context";
-import { DeleteTracksProvider } from "./context/delete-tracks-context";
 import { GenresProvider } from "./context/genres-context";
 import { ROUTES } from "./constants";
 
@@ -17,24 +15,18 @@ function App() {
         <BrowserRouter>
             <AudioPlayerProvider>
                 <GenresProvider>
-                    <TrackListProvider>
-                        <DeleteTracksProvider>
-                            <main>
-                                <Routes>
-                                    <Route
-                                        path="/"
-                                        element={
-                                            <Navigate to={ROUTES.TRACKS} />
-                                        }
-                                    />
-                                    <Route
-                                        path={ROUTES.TRACKS}
-                                        element={<MusicTracksPage />}
-                                    />
-                                </Routes>
-                            </main>
-                        </DeleteTracksProvider>
-                    </TrackListProvider>
+                    <main>
+                        <Routes>
+                            <Route
+                                path="/"
+                                element={<Navigate to={ROUTES.TRACKS} />}
+                            />
+                            <Route
+                                path={ROUTES.TRACKS}
+                                element={<MusicTracksPage />}
+                            />
+                        </Routes>
+                    </main>
                 </GenresProvider>
             </AudioPlayerProvider>
             <ToastContainer

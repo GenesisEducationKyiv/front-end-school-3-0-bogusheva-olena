@@ -1,14 +1,23 @@
 import { Dispatch, SetStateAction, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { R, pipe } from "@mobily/ts-belt";
-import { deleteTracks } from "../api/tracks";
 
-import { useTrackList } from "../context/track-list-context";
-import { useDeleteTracks } from "../context/delete-tracks-context";
-import { useToast } from "../hooks/useToast";
 import { TRACK_DELETE_MODE, TrackDeleteMode } from "../types";
-import { QUERY_PARAMS, TOAST_MESSAGES } from "../constants";
+import { QUERY_PARAMS, QUERYKEY, TOAST_MESSAGES } from "../constants";
 import { logError } from "../utils/utils";
+
+import { useDeleteTracksStore } from "../store/delete-tracks-store";
+import { useTrackStore } from "../store/track-store";
+import {
+    selectAllTracksIds,
+    selectSelectedToDeleteTracks,
+    selectSetSelectedToDeleteTracks,
+    selectSetTracks,
+} from "../store/selectors";
+import { useAllTracksQuery } from "../hooks/useAllTracksQuery";
+import { useToast } from "../hooks/useToast";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
+import { useDeleteTracksMutation } from "../hooks/useDeleteTracksMutation";
 
 import Loader from "../ui/Loader";
 import Modal from "../ui/Modal";
@@ -24,9 +33,9 @@ export default function DeleteTracksModal({
     closeModal,
     setTotalPages,
 }: Props) {
+    const queryClient = useQueryClient();
     const { resetAllQueryParams, updateQueryParam } =
         useQueryParamsController();
-    const [isLoading, setIsLoading] = useState(false);
     const [mode, setMode] = useState<TrackDeleteMode>(
         TRACK_DELETE_MODE.SELECTED
     );
@@ -34,19 +43,25 @@ export default function DeleteTracksModal({
     const isSelectedMode = mode === TRACK_DELETE_MODE.SELECTED;
     const isAllMode = mode === TRACK_DELETE_MODE.ALL;
 
-    const { updateTrackList, setTracks, allTracksIds, isLoadingAllTracks } =
-        useTrackList();
-    const { selectedToDeleteTracks, setSelectedToDeleteTracks } =
-        useDeleteTracks();
+    const setTracks = useTrackStore(selectSetTracks);
+    const allTracksIds = useTrackStore(selectAllTracksIds);
+
+    const { isLoading: isLoadingAllTracks } = useAllTracksQuery();
+    const selectedToDeleteTracks = useDeleteTracksStore(
+        selectSelectedToDeleteTracks
+    );
+    const setSelectedToDeleteTracks = useDeleteTracksStore(
+        selectSetSelectedToDeleteTracks
+    );
     const { showToast } = useToast();
+    const { mutateAsync, isPending } = useDeleteTracksMutation();
 
     const handleDelete = async () => {
-        setIsLoading(true);
         const tracksToDelete = isSelectedMode
             ? selectedToDeleteTracks
             : allTracksIds;
 
-        const res = await deleteTracks(tracksToDelete);
+        const res = await mutateAsync({ ids: tracksToDelete });
         pipe(
             res,
             R.tap((_) => {
@@ -56,7 +71,9 @@ export default function DeleteTracksModal({
                     resetAllQueryParams();
                     setTotalPages(0);
                 } else {
-                    updateTrackList();
+                    queryClient.invalidateQueries({
+                        queryKey: [QUERYKEY.TRACKS],
+                    });
                     updateQueryParam(QUERY_PARAMS.page, "1", {
                         resetPage: false,
                     });
@@ -67,11 +84,12 @@ export default function DeleteTracksModal({
             R.tapError((err) => {
                 showToast(TOAST_MESSAGES.MULTIDELETE_FAIL, "error");
                 logError(err, "Error deleting tracks");
-                if (isAllMode) updateTrackList();
+                if (isAllMode)
+                    queryClient.invalidateQueries({
+                        queryKey: [QUERYKEY.TRACKS],
+                    });
             })
         );
-
-        setIsLoading(false);
     };
 
     const handleClearSelected = () => {
@@ -84,11 +102,12 @@ export default function DeleteTracksModal({
         setMode(
             isSelectedMode ? TRACK_DELETE_MODE.ALL : TRACK_DELETE_MODE.SELECTED
         );
-    const isDisabled = isLoading
+    const isDisabled = isPending
         ? true
         : isSelectedMode
         ? !allTracksIds.length || isLoadingAllTracks
         : !selectedToDeleteTracks.length;
+    const isLoading = isPending || isLoadingAllTracks;
 
     return (
         <Modal
@@ -127,7 +146,7 @@ export default function DeleteTracksModal({
                     data-testid="bulk-delete-button"
                     onClick={handleDelete}
                 >
-                    {isLoading && <Loader className="mr-2 [&>*]:fill-white" />}
+                    {isPending && <Loader className="mr-2 [&>*]:fill-white" />}
                     {"Yes, delete"}
                 </button>
                 <button

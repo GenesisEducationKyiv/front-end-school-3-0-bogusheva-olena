@@ -2,10 +2,14 @@ import { api } from "./axios";
 import { z } from "zod";
 import { Result, R } from "@mobily/ts-belt";
 import {
+    CreateTrackArgs,
+    DeleteTracksArgs,
     GetTracksParams,
     Track,
     TrackWithAudioFile,
     TrackWithoutAudioFile,
+    UpdateTrackArgs,
+    UploadTrackFileArgs,
 } from "../types";
 import {
     trackSchema,
@@ -52,14 +56,14 @@ export async function getAllTracks(): Promise<
         : R.Error(new Error("Invalid track data"));
 }
 
-export async function updateTrack(
-    id: string,
-    title: string,
-    artist: string,
-    album?: string,
-    genres?: string[],
-    coverImage?: string
-): Promise<Result<Track, Error>> {
+export async function updateTrack({
+    id,
+    title,
+    artist,
+    album,
+    genres,
+    coverImage,
+}: UpdateTrackArgs): Promise<Result<Track, Error>> {
     const res = await R.fromPromise(
         api.put(API_ROUTES.SINGLE_TRACK(id), {
             title,
@@ -80,13 +84,13 @@ export async function updateTrack(
         : R.Error(new Error("Invalid updated track data"));
 }
 
-export async function createTrack(
-    title: string,
-    artist: string,
-    album?: string,
-    genres?: string[],
-    coverImage?: string
-): Promise<Result<Track, Error>> {
+export async function createTrack({
+    title,
+    artist,
+    album,
+    genres,
+    coverImage,
+}: CreateTrackArgs): Promise<Result<Track, Error>> {
     const res = await R.fromPromise(
         api.post(API_ROUTES.TRACKS, {
             title,
@@ -112,10 +116,10 @@ export async function deleteTrack(id: string): Promise<R.Result<{}, Error>> {
     return R.isOk(res) ? R.Ok({}) : R.Error(normalizeError(res._0));
 }
 
-export async function uploadTrackFile(
-    id: string,
-    file: File
-): Promise<Result<TrackWithAudioFile, Error>> {
+export async function uploadTrackFile({
+    id,
+    file,
+}: UploadTrackFileArgs): Promise<Result<TrackWithAudioFile, Error>> {
     const formData = new FormData();
     formData.append("file", file);
 
@@ -154,7 +158,9 @@ export async function deleteTrackFile(
         : R.Error(new Error("Invalid deleted file data"));
 }
 
-export async function deleteTracks(ids: string[]): Promise<Result<{}, Error>> {
+export async function deleteTracks({
+    ids,
+}: DeleteTracksArgs): Promise<Result<{}, Error>> {
     const res = await R.fromPromise(
         api.post(API_ROUTES.DELETE_TRACKS, { ids })
     );
