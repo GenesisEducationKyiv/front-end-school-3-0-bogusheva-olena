@@ -24,7 +24,7 @@ import CollectionIcon from "../assets/icons/archive.svg?react";
 
 interface Props {
     track: Track;
-    styling: "default" | "streaming";
+    styling?: "default" | "streaming";
 }
 
 const TrackItem = ({ track, styling = "default" }: Props) => {
