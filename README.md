@@ -68,3 +68,29 @@ npm start
 -   Context API (state)
 -   React Router v6
 -   Custom hook system (toasts, modals, etc.)
+
+## ⚙️ Optimization & Build Configuration
+
+### 🔀 Code-Splitting & Lazy Loading
+
+-   ✅ All modals (`EditTrackModal`, `DeleteTrackModal`, `UploadTrackModal`, `CreateTrackModal`, `DeleteTracksModal`) are dynamically imported **only when triggered**, reducing the initial bundle size.
+-   ✅ `WaveVisualizer` is lazy-loaded via `React.lazy` and `<Suspense>`.
+-   ✅ `TrackForm` is automatically split by Vite due to its size.
+-   ✅ The app benefits from **automatic tree-shaking** (e.g. only used parts of `zod`/`lodash-es` are included).
+
+### 📊 Bundle Analysis
+
+The app uses `rollup-plugin-visualizer` to inspect final bundle size and structure.
+
+After running:
+
+```bash
+npm run build
+```
+
+A browser window with dist/stats.html will open automatically to display the bundle report.
+
+### SourceMaps
+
+Source maps are generated only when explicitly enabled. This helps debugging while avoiding code exposure in production.
+To enable source maps locally, add to your .env: GENERATE_SOURCEMAP=true

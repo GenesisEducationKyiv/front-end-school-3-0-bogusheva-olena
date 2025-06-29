@@ -1,6 +1,11 @@
-import { useState } from "react";
+import React, { Suspense, useState } from "react";
 
-import { Track } from "../types";
+import {
+    DeleteTrackModalProps,
+    EditTrackModalProps,
+    Track,
+    UploadTrackModalProps,
+} from "../types";
 
 import { useModal } from "../hooks/useModal";
 import { useDeleteTracksStore } from "../store/delete-tracks-store";
@@ -11,22 +16,21 @@ import {
 } from "../store/selectors";
 import { useAudioPlayer } from "../context/player-context";
 
-import UploadTrackModal from "./UploadTrackModal";
-import DeleteTrackModal from "./DeleteTrackModal";
-import EditTrackModal from "./EditTrackModal";
 import DropdownMenu from "./DropdownMenu";
-import WaveVisualizer from "../ui/WaveVisualizer";
 import PlayButton from "../ui/PlayButton";
 
 import defaultCover from "../assets/images/default_cover.webp";
 import MenuIcon from "../assets/icons/menu.svg?react";
 import CollectionIcon from "../assets/icons/archive.svg?react";
 
+const WaveVisualizer = React.lazy(() => import("../ui/WaveVisualizer"));
+
 interface Props {
     track: Track;
+    styling?: "default" | "streaming";
 }
 
-const TrackItem = ({ track }: Props) => {
+const TrackItem = ({ track, styling = "default" }: Props) => {
     const id = track.id;
 
     const {
@@ -44,6 +48,31 @@ const TrackItem = ({ track }: Props) => {
         closeModal: closeUploadModal,
         isModalOpened: isUploadModalOpened,
     } = useModal();
+
+    // Dynamically import the EditTrackModal component
+    // to avoid loading it until it's needed
+    const [EditTrackModal, setEditTrackModal] =
+        useState<React.ComponentType<EditTrackModalProps> | null>(null);
+    const [DeleteTrackModal, setDeleteTrackModal] =
+        useState<React.ComponentType<DeleteTrackModalProps> | null>(null);
+    const [UploadTrackModal, setUploadTrackModal] =
+        useState<React.ComponentType<UploadTrackModalProps> | null>(null);
+
+    const handleOpenEditModal = async () => {
+        const module = await import("./EditTrackModal");
+        setEditTrackModal(() => module.default);
+        openEditModal();
+    };
+    const handleOpenDeleteModal = async () => {
+        const module = await import("./DeleteTrackModal");
+        setDeleteTrackModal(() => module.default);
+        openDeleteModal();
+    };
+    const handleOpenUploadModal = async () => {
+        const module = await import("./UploadTrackModal");
+        setUploadTrackModal(() => module.default);
+        openUploadModal();
+    };
 
     const selectedToDeleteTracks = useDeleteTracksStore(
         selectSelectedToDeleteTracks
@@ -75,6 +104,8 @@ const TrackItem = ({ track }: Props) => {
         }
     };
 
+    const isStreamingTrack = styling === "streaming";
+
     return (
         <>
             <li
@@ -90,44 +121,48 @@ const TrackItem = ({ track }: Props) => {
                             {track.album}
                         </div>
                     )}
-                    <div className="md:absolute top-0 right-0 m-2 flex gap-x-1.5 justify-end flex-grow">
-                        <div className="relative" onClick={toggleChecked}>
-                            <CollectionIcon
-                                className={`w-[26px] h-[26px] cursor-pointer ${
-                                    checked
-                                        ? "[&>*]:fill-red-600"
-                                        : "[&>*]:fill-green-600"
-                                }`}
-                            />
-                            <input
-                                type="checkbox"
-                                className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
-                                onChange={toggleChecked}
-                                checked={checked}
-                                data-testid={`track-checkbox-${id}`}
-                            />
-                        </div>
-                        <div className="relative">
-                            <button
-                                type="button"
-                                className="border rounded p-1 text-sm hover:bg-gray-100"
-                                onClick={() => setIsMenuShown((prev) => !prev)}
-                                aria-label="Track options"
-                                data-testid={`track-item-${id}-options-button`}
-                            >
-                                <MenuIcon className="w-4 h-4" />
-                            </button>
-                            {isMenuShown && (
-                                <DropdownMenu
-                                    track={track}
-                                    setShowMenu={setIsMenuShown}
-                                    openEditModal={openEditModal}
-                                    openDeleteModal={openDeleteModal}
-                                    openUploadModal={openUploadModal}
+                    {!isStreamingTrack && (
+                        <div className="md:absolute top-0 right-0 m-2 flex gap-x-1.5 justify-end flex-grow">
+                            <div className="relative" onClick={toggleChecked}>
+                                <CollectionIcon
+                                    className={`w-[26px] h-[26px] cursor-pointer ${
+                                        checked
+                                            ? "[&>*]:fill-red-600"
+                                            : "[&>*]:fill-green-600"
+                                    }`}
                                 />
-                            )}
+                                <input
+                                    type="checkbox"
+                                    className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                                    onChange={toggleChecked}
+                                    checked={checked}
+                                    data-testid={`track-checkbox-${id}`}
+                                />
+                            </div>
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    className="border rounded p-1 text-sm hover:bg-gray-100"
+                                    onClick={() =>
+                                        setIsMenuShown((prev) => !prev)
+                                    }
+                                    aria-label="Track options"
+                                    data-testid={`track-item-${id}-options-button`}
+                                >
+                                    <MenuIcon className="w-4 h-4" />
+                                </button>
+                                {isMenuShown && (
+                                    <DropdownMenu
+                                        track={track}
+                                        setShowMenu={setIsMenuShown}
+                                        openEditModal={handleOpenEditModal}
+                                        openDeleteModal={handleOpenDeleteModal}
+                                        openUploadModal={handleOpenUploadModal}
+                                    />
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
                 <div className="flex items-center px-2 pt-2 pb-1 gap-x-2 lg:gap-x-6">
                     <div className="flex flex-shrink-0 justify-between gap-x-2 items-center">
@@ -163,23 +198,31 @@ const TrackItem = ({ track }: Props) => {
                         </p>
                     </div>
                 </div>
-                <WaveVisualizer track={track} />
+                <Suspense fallback={null}>
+                    {!isStreamingTrack && <WaveVisualizer track={track} />}
+                </Suspense>
             </li>
-            <EditTrackModal
-                track={track}
-                isModalOpened={isEditModalOpened}
-                closeModal={closeEditModal}
-            />
-            <DeleteTrackModal
-                isModalOpened={isDeleteModalOpened}
-                closeModal={closeDeleteModal}
-                track={track}
-            />
-            <UploadTrackModal
-                isModalOpened={isUploadModalOpened}
-                closeModal={closeUploadModal}
-                track={track}
-            />
+            {isEditModalOpened && EditTrackModal && (
+                <EditTrackModal
+                    track={track}
+                    isModalOpened={isEditModalOpened}
+                    closeModal={closeEditModal}
+                />
+            )}
+            {isDeleteModalOpened && DeleteTrackModal && (
+                <DeleteTrackModal
+                    isModalOpened={isDeleteModalOpened}
+                    closeModal={closeDeleteModal}
+                    track={track}
+                />
+            )}
+            {isUploadModalOpened && UploadTrackModal && (
+                <UploadTrackModal
+                    isModalOpened={isUploadModalOpened}
+                    closeModal={closeUploadModal}
+                    track={track}
+                />
+            )}
         </>
     );
 };

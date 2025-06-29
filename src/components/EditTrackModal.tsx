@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { R, pipe } from "@mobily/ts-belt";
 
-import { Track, TrackFormValues } from "../types";
+import { EditTrackModalProps, TrackFormValues } from "../types";
 import { TOAST_MESSAGES } from "../constants";
 import { updateTrack } from "../api/tracks";
 import { logError } from "../utils/utils";
@@ -14,17 +14,11 @@ import { useQueryParamsController } from "../hooks/useQueryParamsController";
 import Modal from "../ui/Modal";
 import TrackForm from "./TrackForm";
 
-interface Props {
-    track: Track;
-    isModalOpened: boolean;
-    closeModal: () => void;
-}
-
 export default function EditTrackModal({
     isModalOpened,
     closeModal,
     track,
-}: Props) {
+}: EditTrackModalProps) {
     const [isLoading, setIsLoading] = useState(false);
 
     const updateTrackInList = useTrackStore(selectUpdateTrackInList);
