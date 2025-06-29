@@ -1,5 +1,5 @@
 import { api } from "./axios";
-import { z } from "zod";
+import { infer as zInfer } from "zod";
 import { Result, R } from "@mobily/ts-belt";
 import {
     CreateTrackArgs,
@@ -22,7 +22,7 @@ import { API_ROUTES, COLLECTION_TRACKS_LIMIT } from "../constants";
 
 export async function getTracks(
     params?: GetTracksParams
-): Promise<Result<z.infer<typeof getTracksResponseSchema>, Error>> {
+): Promise<Result<zInfer<typeof getTracksResponseSchema>, Error>> {
     const res = await R.fromPromise(api.get(API_ROUTES.TRACKS, { params }));
 
     if (R.isError(res)) {
@@ -37,7 +37,7 @@ export async function getTracks(
 }
 
 export async function getAllTracks(): Promise<
-    Result<z.infer<typeof getTracksResponseSchema>, Error>
+    Result<zInfer<typeof getTracksResponseSchema>, Error>
 > {
     const res = await R.fromPromise(
         api.get(API_ROUTES.TRACKS, {

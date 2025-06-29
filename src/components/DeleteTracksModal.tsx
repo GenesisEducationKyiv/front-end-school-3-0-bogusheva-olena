@@ -1,8 +1,12 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { R, pipe } from "@mobily/ts-belt";
 
-import { TRACK_DELETE_MODE, TrackDeleteMode } from "../types";
+import {
+    DeleteTracksModalProps,
+    TRACK_DELETE_MODE,
+    TrackDeleteMode,
+} from "../types";
 import { QUERY_PARAMS, QUERYKEY, TOAST_MESSAGES } from "../constants";
 import { logError } from "../utils/utils";
 
@@ -22,17 +26,11 @@ import { useDeleteTracksMutation } from "../hooks/useDeleteTracksMutation";
 import Loader from "../ui/Loader";
 import Modal from "../ui/Modal";
 
-interface Props {
-    isModalOpened: boolean;
-    closeModal: () => void;
-    setTotalPages: Dispatch<SetStateAction<number>>;
-}
-
 export default function DeleteTracksModal({
     isModalOpened,
     closeModal,
     setTotalPages,
-}: Props) {
+}: DeleteTracksModalProps) {
     const queryClient = useQueryClient();
     const { resetAllQueryParams, updateQueryParam } =
         useQueryParamsController();
@@ -102,11 +100,15 @@ export default function DeleteTracksModal({
         setMode(
             isSelectedMode ? TRACK_DELETE_MODE.ALL : TRACK_DELETE_MODE.SELECTED
         );
-    const isDisabled = isPending
-        ? true
-        : isSelectedMode
-        ? !allTracksIds.length || isLoadingAllTracks
-        : !selectedToDeleteTracks.length;
+    const isDeleteButtonDisabled =
+        isPending ||
+        isLoadingAllTracks ||
+        (isSelectedMode
+            ? !selectedToDeleteTracks.length
+            : !allTracksIds.length);
+
+    const isToggleModeDisabled = isPending || isLoadingAllTracks;
+
     const isLoading = isPending || isLoadingAllTracks;
 
     return (
@@ -126,8 +128,8 @@ export default function DeleteTracksModal({
                 <button
                     type="button"
                     onClick={toggleMode}
-                    aria-disabled={isDisabled}
-                    disabled={isDisabled}
+                    disabled={isToggleModeDisabled}
+                    aria-disabled={isToggleModeDisabled}
                     data-testid="select-mode-toggle"
                     className="text-sm text-red-500 underline font-extrabold disabled:text-gray-400"
                 >
@@ -139,8 +141,8 @@ export default function DeleteTracksModal({
             <div className="flex gap-x-2">
                 <button
                     type="submit"
-                    disabled={isLoading}
-                    aria-disabled={isLoading}
+                    disabled={isDeleteButtonDisabled}
+                    aria-disabled={isDeleteButtonDisabled}
                     data-loading={isLoading || undefined}
                     className="flex bg-red-600 text-white px-4 py-2 rounded hover:bg-green-700"
                     data-testid="bulk-delete-button"

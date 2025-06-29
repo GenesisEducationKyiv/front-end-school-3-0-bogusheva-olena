@@ -1,5 +1,5 @@
 import { R, pipe } from "@mobily/ts-belt";
-import { Track } from "../types";
+import { DeleteTrackModalProps } from "../types";
 import { QUERY_PARAMS, TOAST_MESSAGES } from "../constants";
 import { logError } from "../utils/utils";
 
@@ -16,17 +16,11 @@ import { useQueryParamsController } from "../hooks/useQueryParamsController";
 import Loader from "../ui/Loader";
 import Modal from "../ui/Modal";
 
-interface Props {
-    isModalOpened: boolean;
-    track: Track;
-    closeModal: () => void;
-}
-
 export default function DeleteTrackModal({
     isModalOpened,
     closeModal,
     track,
-}: Props) {
+}: DeleteTrackModalProps) {
     const { updateQueryParam } = useQueryParamsController();
     const removeTrackFromList = useTrackStore(selectRemoveTrackFromList);
     const removeFromSelected = useDeleteTracksStore(selectRemoveFromSelected);

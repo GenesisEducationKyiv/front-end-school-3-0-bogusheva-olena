@@ -14,16 +14,17 @@ import {
     SORT_BY_OPTIONS,
     SORT_ORDER_OPTIONS,
 } from "../constants";
-import { isFilterKey } from "../types";
+import {
+    CreateTrackModalProps,
+    DeleteTracksModalProps,
+    isFilterKey,
+} from "../types";
 import { useGenres } from "../context/genres-context";
 import { useDeleteTracksStore } from "../store/delete-tracks-store";
 import { selectSelectedToDeleteTracks } from "../store/selectors";
 import { useTracksQuery } from "../hooks/useTracksQuery";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
 import { useModal } from "../hooks/useModal";
-
-import CreateTrackModal from "./CreateTrackModal";
-import DeleteTracksModal from "./DeleteTracksModal";
 
 interface FiltersProps {
     setTotalPages: Dispatch<SetStateAction<number>>;
@@ -54,6 +55,24 @@ export default function Heading({ setTotalPages }: FiltersProps) {
         closeModal: closeDeleteTracksModal,
         isModalOpened: isDeleteTracksModalOpened,
     } = useModal();
+
+    // Dynamically import the CreateTrackModal and DeleteTracksModal components
+    // to avoid loading them until they're needed
+    const [CreateTrackModal, setCreateTrackModal] =
+        useState<React.ComponentType<CreateTrackModalProps> | null>(null);
+    const [DeleteTracksModal, setDeleteTracksModal] =
+        useState<React.ComponentType<DeleteTracksModalProps> | null>(null);
+
+    const handleOpenCreateModal = async () => {
+        const module = await import("./CreateTrackModal");
+        setCreateTrackModal(() => module.default);
+        openCreateModal();
+    };
+    const handleOpenDeleteTracksModal = async () => {
+        const module = await import("./DeleteTracksModal");
+        setDeleteTracksModal(() => module.default);
+        openDeleteTracksModal();
+    };
 
     useEffect(() => {
         setDebounced({ search: filters.search, artist: filters.artist });
@@ -135,7 +154,7 @@ export default function Heading({ setTotalPages }: FiltersProps) {
                     <button
                         className="bg-red-600 w-full text-white px-2 py-1 rounded hover:bg-red-700 disabled:bg-gray-400"
                         type="button"
-                        onClick={openDeleteTracksModal}
+                        onClick={handleOpenDeleteTracksModal}
                         disabled={
                             isLoadingTracks || !selectedToDeleteTracks.length
                         }
@@ -148,7 +167,7 @@ export default function Heading({ setTotalPages }: FiltersProps) {
                     <button
                         className="bg-green-600 w-full text-white px-2 py-1 rounded hover:bg-green-700 disabled:bg-gray-400"
                         type="button"
-                        onClick={openCreateModal}
+                        onClick={handleOpenCreateModal}
                         disabled={isLoadingTracks}
                         aria-disabled={isLoadingTracks}
                         data-loading={isLoadingTracks || undefined}
@@ -214,15 +233,19 @@ export default function Heading({ setTotalPages }: FiltersProps) {
                     />
                 </div>
             </div>
-            <CreateTrackModal
-                isModalOpened={isCreateModalOpened}
-                closeModal={closeCreateModal}
-            />
-            <DeleteTracksModal
-                isModalOpened={isDeleteTracksModalOpened}
-                closeModal={closeDeleteTracksModal}
-                setTotalPages={setTotalPages}
-            />
+            {isCreateModalOpened && CreateTrackModal && (
+                <CreateTrackModal
+                    isModalOpened={isCreateModalOpened}
+                    closeModal={closeCreateModal}
+                />
+            )}
+            {isDeleteTracksModalOpened && DeleteTracksModal && (
+                <DeleteTracksModal
+                    isModalOpened={isDeleteTracksModalOpened}
+                    closeModal={closeDeleteTracksModal}
+                    setTotalPages={setTotalPages}
+                />
+            )}
         </>
     );
 }

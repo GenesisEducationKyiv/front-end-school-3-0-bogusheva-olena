@@ -4,18 +4,16 @@ import TrackForm from "./TrackForm";
 import { useToast } from "../hooks/useToast";
 import { FormikHelpers } from "formik";
 import { useGenres } from "../context/genres-context";
-import { TrackFormValues } from "../types";
+import { CreateTrackModalProps, TrackFormValues } from "../types";
 import { TOAST_MESSAGES } from "../constants";
 import { logError } from "../utils/utils";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
 import { useCreateTrackMutation } from "../hooks/useCreateTrackMutation";
 
-interface Props {
-    isModalOpened: boolean;
-    closeModal: () => void;
-}
-
-export default function CreateTrackModal({ isModalOpened, closeModal }: Props) {
+export default function CreateTrackModal({
+    isModalOpened,
+    closeModal,
+}: CreateTrackModalProps) {
     const { resetAllQueryParams } = useQueryParamsController();
     const { genres } = useGenres();
     const { showToast } = useToast();
