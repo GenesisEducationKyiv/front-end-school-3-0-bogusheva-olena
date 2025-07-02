@@ -1,4 +1,6 @@
-export const FILE_PATH = `http://localhost:8000/api/files/`;
+import { BASE_URL } from "./main";
+
+export const FILE_PATH = `${BASE_URL}/files/`;
 
 export const VALID_FILE_TYPE = ["audio/mpeg", "audio/wav", "audio/mp3"];
 

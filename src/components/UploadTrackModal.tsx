@@ -1,6 +1,6 @@
 import { ChangeEvent, useState } from "react";
 import { R, pipe } from "@mobily/ts-belt";
-import { Track } from "../types";
+import { UploadTrackModalProps } from "../types";
 import {
     FILE_ERRORS,
     FILE_MAX_SIZE,
@@ -19,17 +19,11 @@ import { useToast } from "../hooks/useToast";
 import Loader from "../ui/Loader";
 import Modal from "../ui/Modal";
 
-interface Props {
-    isModalOpened: boolean;
-    track: Track;
-    closeModal: () => void;
-}
-
 export default function UploadTrackModal({
     isModalOpened,
     closeModal,
     track,
-}: Props) {
+}: UploadTrackModalProps) {
     const [file, setFile] = useState<File | null>(null);
     const [error, setError] = useState("");
 
