@@ -6,13 +6,13 @@ import EditIcon from "../ui/EditIcon";
 import DeleteIcon from "../ui/DeleteIcon";
 import UploadIcon from "../ui/UploadIcon";
 
-interface Props {
+type Props = {
     track: Track;
     setShowMenu: Dispatch<SetStateAction<boolean>>;
     openEditModal: () => void;
     openDeleteModal: () => void;
     openUploadModal: () => void;
-}
+};
 
 export default function DropdownMenu({
     track,

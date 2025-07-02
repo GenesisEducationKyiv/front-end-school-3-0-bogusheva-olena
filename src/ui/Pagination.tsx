@@ -1,9 +1,9 @@
-interface Props {
+type Props = {
     page: number;
     totalPages: number;
     handlePrevPage: () => void;
     handleNextPage: () => void;
-}
+};
 
 export default function Pagination({ page, totalPages, handlePrevPage, handleNextPage }: Props) {
     return (

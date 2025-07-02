@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { O, pipe } from "@mobily/ts-belt";
 import { GetTracksParams, QueryParamsKey, QueryParamsOptions } from "../types";
@@ -7,7 +8,6 @@ import { logError } from "../utils/utils";
 import { useSortParams } from "./useSortParams";
 import { usePaginationParams } from "./usePaginationParams";
 import { useFilterParams } from "./useFilterParams";
-import { useMemo } from "react";
 
 export function useQueryParamsController() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -27,29 +27,32 @@ export function useQueryParamsController() {
         [sortBy, sortOrder, search, genre, artist, page]
     );
 
-    const updateQueryParam = (
-        key: QueryParamsKey,
-        value: string,
-        options?: { resetPage?: boolean }
-    ) => {
-        const newParams = new URLSearchParams(searchParams.toString());
+    const updateQueryParam = useCallback(
+        (
+            key: QueryParamsKey,
+            value: string,
+            options?: { resetPage?: boolean }
+        ) => {
+            const newParams = new URLSearchParams(searchParams.toString());
 
-        if (value) {
-            newParams.set(key, value);
-        } else {
-            newParams.delete(key);
-        }
+            if (value) {
+                newParams.set(key, value);
+            } else {
+                newParams.delete(key);
+            }
 
-        if (key !== QUERY_PARAMS.page && options?.resetPage !== false) {
-            newParams.set(QUERY_PARAMS.page, "1");
-        }
+            if (key !== QUERY_PARAMS.page && options?.resetPage !== false) {
+                newParams.set(QUERY_PARAMS.page, "1");
+            }
 
-        if (newParams.get(QUERY_PARAMS.page) === "1") {
-            newParams.delete(QUERY_PARAMS.page);
-        }
+            if (newParams.get(QUERY_PARAMS.page) === "1") {
+                newParams.delete(QUERY_PARAMS.page);
+            }
 
-        setSearchParams(newParams);
-    };
+            setSearchParams(newParams);
+        },
+        [searchParams, setSearchParams]
+    );
 
     const buildRequestParams = (
         filters: QueryParamsOptions

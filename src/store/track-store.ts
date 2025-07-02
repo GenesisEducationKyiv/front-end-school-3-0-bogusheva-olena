@@ -1,14 +1,14 @@
 import { create } from "zustand";
 import { Track } from "../types";
 
-interface TrackStore {
+type TrackStore = {
     tracks: Track[];
     allTracksIds: string[];
     setTracks: (tracks: Track[]) => void;
     updateTrackInList: (track: Track) => void;
     removeTrackFromList: (id: string) => void;
     setAllTracksIds: (ids: string[]) => void;
-}
+};
 
 export const useTrackStore = create<TrackStore>((set) => ({
     tracks: [],

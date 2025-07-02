@@ -1,4 +1,4 @@
-import {
+import React, {
     ChangeEvent,
     Dispatch,
     SetStateAction,
@@ -26,9 +26,9 @@ import { useTracksQuery } from "../hooks/useTracksQuery";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
 import { useModal } from "../hooks/useModal";
 
-interface FiltersProps {
+type FiltersProps = {
     setTotalPages: Dispatch<SetStateAction<number>>;
-}
+};
 
 export default function Heading({ setTotalPages }: FiltersProps) {
     const { filters, updateQueryParam } = useQueryParamsController();
@@ -83,14 +83,14 @@ export default function Heading({ setTotalPages }: FiltersProps) {
             updateQueryParam(QUERY_PARAMS.search, debounced.search.trim());
         }, SEARCH_DEBOUNCE_MS);
         return () => clearTimeout(timeout);
-    }, [debounced.search]);
+    }, [debounced.search, updateQueryParam]);
 
     useEffect(() => {
         const timeout = setTimeout(() => {
             updateQueryParam(QUERY_PARAMS.artist, debounced.artist.trim());
         }, SEARCH_DEBOUNCE_MS);
         return () => clearTimeout(timeout);
-    }, [debounced.artist]);
+    }, [debounced.artist, updateQueryParam]);
 
     const matchingGenres =
         filters.genre.length > 0

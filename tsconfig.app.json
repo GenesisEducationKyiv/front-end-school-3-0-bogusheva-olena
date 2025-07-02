@@ -32,5 +32,11 @@
         "noPropertyAccessFromIndexSignature": true,
         "exactOptionalPropertyTypes": true
     },
-    "include": ["src", "int-tests", "svg.d.ts"]
+    "include": [
+        "src",
+        "int-tests",
+        "svg.d.ts",
+        "e2e-tests",
+        "src/vite-env.d.ts"
+    ]
 }
