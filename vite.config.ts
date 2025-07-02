@@ -21,5 +21,16 @@ export default defineConfig({
     },
     build: {
         sourcemap: process.env.GENERATE_SOURCEMAP === "true",
+        rollupOptions: {
+            treeshake: "smallest",
+            output: {
+                manualChunks: {
+                    react: ["react", "react-dom", "react-router-dom"],
+                    form: ["formik", "zod"],
+                    state: ["zustand", "@tanstack/react-query"],
+                    vendor: ["axios"],
+                },
+            },
+        },
     },
 });
