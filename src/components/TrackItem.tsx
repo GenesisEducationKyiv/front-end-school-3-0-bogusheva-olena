@@ -109,8 +109,14 @@ const TrackItem = ({ track, styling = "default" }: Props) => {
     return (
         <>
             <li
-                className="relative border rounded flex-grow"
-                data-testid={`track-item-${id}`}
+                className={`relative border rounded flex-grow list-none ${
+                    isStreamingTrack
+                        ? "border-green-600 pb-1 lg:max-w-[70%] mx-auto"
+                        : ""
+                }`}
+                data-testid={
+                    isStreamingTrack ? "streaming-track" : `track-item-${id}`
+                }
             >
                 <div className="flex items-center justify-end">
                     {track.album && (
@@ -167,14 +173,18 @@ const TrackItem = ({ track, styling = "default" }: Props) => {
                 <div className="flex items-center px-2 pt-2 pb-1 gap-x-2 lg:gap-x-6">
                     <div className="flex flex-shrink-0 justify-between gap-x-2 items-center">
                         <img
-                            src={track.coverImage || defaultCover}
+                            src={
+                                isStreamingTrack
+                                    ? defaultCover
+                                    : track.coverImage || defaultCover
+                            }
                             alt={track.title}
                             className="w-16 h-16 rounded object-cover"
                             data-testid={`track-item-${id}-cover-image`}
                         />
                     </div>
                     <div className="h-[100%] group w-[32px]">
-                        {track.audioFile && (
+                        {track.audioFile && !isStreamingTrack && (
                             <PlayButton
                                 id={id}
                                 isPlaying={isCurrent && isPlaying}
