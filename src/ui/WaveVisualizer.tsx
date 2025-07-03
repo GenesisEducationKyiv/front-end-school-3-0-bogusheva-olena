@@ -1,9 +1,9 @@
 import { useAudioPlayer } from "../context/player-context";
 import { Track } from "../types";
 
-interface Props {
+type Props = {
     track: Track;
-}
+};
 
 export default function WaveVisualizer({ track }: Props) {
     const { isPlaying, currentTrackId, progress } = useAudioPlayer();

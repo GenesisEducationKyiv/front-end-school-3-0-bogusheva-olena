@@ -25,10 +25,10 @@ import CollectionIcon from "../assets/icons/archive.svg?react";
 
 const WaveVisualizer = React.lazy(() => import("../ui/WaveVisualizer"));
 
-interface Props {
+type Props = {
     track: Track;
     styling?: "default" | "streaming";
-}
+};
 
 const TrackItem = ({ track, styling = "default" }: Props) => {
     const id = track.id;

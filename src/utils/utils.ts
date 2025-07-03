@@ -17,7 +17,7 @@ export function normalizeError(e: unknown): Error {
 export function logError(error: unknown, context?: string) {
     const label = context ? `[Error] ${context}` : "[Error]";
 
-     if (error instanceof ZodError) {
+    if (error instanceof ZodError) {
         console.error(label, error.format());
     } else {
         console.error(label, error);

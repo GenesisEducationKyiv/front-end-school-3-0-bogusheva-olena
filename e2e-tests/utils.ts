@@ -1,4 +1,5 @@
 import { Page, expect } from "@playwright/test";
+import { Track } from "../src/types";
 
 export async function waitForTrackInApi(
     page: Page,
@@ -13,7 +14,7 @@ export async function waitForTrackInApi(
             response.request().method() === "GET"
         ) {
             const body = await response.json();
-            const titles = body.data?.map((t: any) => t.title);
+            const titles = body.data?.map((t: Track) => t.title);
             if (titles?.includes(title)) {
                 found = true;
             }
@@ -54,4 +55,3 @@ export async function waitForTrackToDisappear(
 
     expect(stillPresent).toBe(false);
 }
-

@@ -6,7 +6,7 @@ import CloseIcon from "../assets/icons/close.svg?react";
 import { Track, TrackFormValues } from "../types";
 import { trackFormSchema } from "../schemas/schemas";
 
-interface Props {
+type Props = {
     genres: string[];
     closeModal: () => void;
     isLoading: boolean;
@@ -15,7 +15,7 @@ interface Props {
         formikHelpers: FormikHelpers<TrackFormValues>,
     ) => void;
     track?: Track;
-}
+};
 
 export default function TrackForm({
     genres,

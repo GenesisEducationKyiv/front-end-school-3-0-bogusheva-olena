@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { waitForTrackInApi } from "./utils";
 import { waitForTrackToDisappear } from "./utils";
+import { Track } from "../src/types";
 
 test("delete a track", async ({ page }) => {
     const uniqueTitle = `1.${Date.now()}`;
@@ -59,7 +60,7 @@ test("delete a track", async ({ page }) => {
                     "http://localhost:8000/tracks"
                 );
                 const body = await response.json();
-                const titles = body.data?.map((t: any) => t.title) ?? [];
+                const titles = body.data?.map((t: Track) => t.title) ?? [];
                 return titles.includes(uniqueTitle);
             },
             {
@@ -70,4 +71,3 @@ test("delete a track", async ({ page }) => {
         .toBe(false);
     await waitForTrackToDisappear(page, uniqueTitle);
 });
-

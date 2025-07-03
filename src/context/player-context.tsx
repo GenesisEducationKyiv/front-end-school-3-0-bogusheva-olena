@@ -10,13 +10,13 @@ import { Track } from "../types";
 import { FILE_PATH } from "../constants";
 import { logError } from "../utils/utils";
 
-interface AudioPlayerContextType {
+type AudioPlayerContextType = {
     playTrack: (track: Track) => void;
     pauseTrack: () => void;
     isPlaying: boolean;
     currentTrackId: string | null;
     progress: number;
-}
+};
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(
     undefined,

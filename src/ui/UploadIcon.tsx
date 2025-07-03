@@ -1,4 +1,8 @@
-export default function UploadIcon(props: React.SVGProps<SVGSVGElement>) {
+import React, { JSX } from "react";
+
+export default function UploadIcon(
+    props: React.SVGProps<SVGSVGElement>
+): JSX.Element {
     return (
         <svg
             width="800px"
@@ -43,4 +47,3 @@ export default function UploadIcon(props: React.SVGProps<SVGSVGElement>) {
         </svg>
     );
 }
-

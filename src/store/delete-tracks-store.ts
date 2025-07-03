@@ -1,12 +1,12 @@
 import { create } from "zustand";
 
-interface DeleteTracksStore {
+type DeleteTracksStore = {
     selectedToDeleteTracks: string[];
     setSelectedToDeleteTracks: (ids: string[]) => void;
     addToSelected: (id: string) => void;
     removeFromSelected: (id: string) => void;
     toggleSelected: (id: string) => void;
-}
+};
 
 export const useDeleteTracksStore = create<DeleteTracksStore>((set, get) => ({
     selectedToDeleteTracks: [],
