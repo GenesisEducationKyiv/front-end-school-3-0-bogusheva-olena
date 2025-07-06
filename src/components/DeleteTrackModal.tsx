@@ -28,12 +28,11 @@ export default function DeleteTrackModal({
     const { mutateAsync, isPending } = useDeleteTrackMutation();
 
     const handleDelete = async () => {
-        removeTrackFromList(track.id);
-
         const res = await mutateAsync(track.id);
         pipe(
             res,
             R.tap((_) => {
+                removeTrackFromList(track.id);
                 showToast(TOAST_MESSAGES.DELETE_SUCCESS, "success");
                 removeFromSelected(track.id);
                 updateQueryParam(QUERY_PARAMS.page, "1", { resetPage: false });
