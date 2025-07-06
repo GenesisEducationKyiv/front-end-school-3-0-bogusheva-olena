@@ -11,10 +11,10 @@ import TrackItem from "./TrackItem";
 import Loader from "../ui/Loader";
 import Pagination from "../ui/Pagination";
 
-interface Props {
+type Props = {
     totalPages: number;
     setTotalPages: Dispatch<SetStateAction<number>>;
-}
+};
 
 export default function TracksList({ totalPages, setTotalPages }: Props) {
     const { filters, updateQueryParam, requestTracksParams } =

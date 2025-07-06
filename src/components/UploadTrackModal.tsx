@@ -73,6 +73,7 @@ export default function UploadTrackModal({
 
     const handleDeleteFile = async () => {
         const originalTrack = { ...track };
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { audioFile, ...rest } = track;
         updateTrackInList(rest);
 

@@ -9,10 +9,10 @@ import { R, pipe } from "@mobily/ts-belt";
 import { logError } from "../utils/utils";
 import { useGenresQuery } from "../hooks/useGenresQuery";
 
-interface GenresContextType {
+type GenresContextType = {
     genres: string[];
     isLoadingGenres: boolean;
-}
+};
 
 export const GenresContext = createContext<GenresContextType | undefined>(
     undefined

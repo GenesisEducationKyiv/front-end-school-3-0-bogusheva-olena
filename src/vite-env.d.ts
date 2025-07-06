@@ -7,12 +7,12 @@ declare module "*.svg?react" {
     export default ReactComponent;
 }
 
-interface ImportMetaEnv {
+type ImportMetaEnv = {
     readonly VITE_BASE_URL: string;
     readonly VITE_WS_BASE_URL: string;
     readonly GENERATE_SOURCEMAP: boolean;
-}
+};
 
-interface ImportMeta {
+type ImportMeta = {
     readonly env: ImportMetaEnv;
-}
+};

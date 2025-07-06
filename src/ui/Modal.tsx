@@ -17,9 +17,6 @@ export default function Modal({
     name,
     children,
 }: Props) {
-    const modalRoot = document.getElementById("modals");
-    if (!modalRoot) return null;
-
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === "Escape") onClose();
@@ -27,6 +24,9 @@ export default function Modal({
         document.addEventListener("keydown", handleEscape);
         return () => document.removeEventListener("keydown", handleEscape);
     }, [onClose]);
+
+    const modalRoot = document.getElementById("modals");
+    if (!modalRoot) return null;
 
     if (!isOpened) return null;
 

@@ -1,9 +1,9 @@
 import LoaderIcon from "../assets/icons/loader.svg?react";
 
-interface Props {
+type Props = {
     className?: string;
     testId?: string;
-}
+};
 
 export default function Loader({ className = "", testId = "loading-indicator" }: Props) {
     return (

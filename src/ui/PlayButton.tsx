@@ -1,11 +1,11 @@
 import PlayIcon from "../assets/icons/play.svg?react";
 import PauseIcon from "../assets/icons/pause.svg?react";
 
-interface Props {
+type Props = {
     id: string;
     isPlaying: boolean;
     onClick: () => void;
-}
+};
 
 const PLAY_LABEL = "Play track";
 const PAUSE_LABEL = "Pause track";

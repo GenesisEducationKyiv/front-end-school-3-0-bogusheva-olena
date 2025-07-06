@@ -9,13 +9,40 @@ import pluginZod from "eslint-plugin-zod";
 
 export default defineConfig([
     {
-        files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
+        files: ["**/*.d.ts"],
+        languageOptions: {
+            parser: tseslint.parser,
+            parserOptions: {
+                ecmaVersion: "latest",
+                sourceType: "module",
+                ecmaFeatures: { jsx: false },
+                project: undefined,
+            },
+        },
+        rules: {},
+    },
+    {
+        files: [
+            "src/**/*.{js,ts,jsx,tsx}",
+            "e2e-tests/**/*.ts",
+            "int-tests/**/*.{ts,tsx}",
+        ],
+        ignores: [
+            "node_modules",
+            "dist",
+            "public",
+            "playwright/.cache",
+            "playwright-report",
+            "*.d.ts",
+            "**/*.d.ts",
+        ],
         languageOptions: {
             parser: tseslint.parser,
             parserOptions: {
                 ecmaVersion: "latest",
                 sourceType: "module",
                 ecmaFeatures: { jsx: true },
+                project: "./tsconfig.app.json",
             },
             globals: globals.browser,
         },
@@ -42,13 +69,8 @@ export default defineConfig([
             "react/prop-types": "off",
             "no-unused-vars": "off",
 
-            "zod/prefer-zod-methods": "warn",
-
             "@typescript-eslint/consistent-type-definitions": ["warn", "type"],
-            "@typescript-eslint/explicit-function-return-type": [
-                "warn",
-                { allowExpressions: true },
-            ],
+            "@typescript-eslint/explicit-function-return-type": "off",
         },
     },
     {
