@@ -33,8 +33,8 @@ export default function TrackForm({
             coverImage: track?.coverImage || "",
         },
         enableReinitialize: true,
-        validate: (values) => {
-            const result = trackFormSchema.safeParse(values);
+        validate: async (values) => {
+            const result = await trackFormSchema.safeParseAsync(values);
             if (result.success) return {};
 
             const fieldErrors = result.error.flatten().fieldErrors;

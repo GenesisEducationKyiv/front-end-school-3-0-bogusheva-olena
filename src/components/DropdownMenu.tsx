@@ -1,10 +1,10 @@
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
-
+import { lazy, Suspense } from "react";
 import { Track } from "../types";
 
-import EditIcon from "../ui/EditIcon";
-import DeleteIcon from "../ui/DeleteIcon";
-import UploadIcon from "../ui/UploadIcon";
+const EditIcon = lazy(() => import("../ui/EditIcon"));
+const DeleteIcon = lazy(() => import("../ui/DeleteIcon"));
+const UploadIcon = lazy(() => import("../ui/UploadIcon"));
 
 type Props = {
     track: Track;
@@ -52,7 +52,9 @@ export default function DropdownMenu({
                 data-testid={`edit-track-${track.id}`}
                 aria-label="Edit track"
             >
-                <EditIcon className="w-4 h-4" />
+                <Suspense fallback={<span className="inline-block w-4 h-4" />}>
+                    <EditIcon className="w-4 h-4" />
+                </Suspense>
             </button>
             <button
                 type="button"
@@ -64,7 +66,9 @@ export default function DropdownMenu({
                 data-testid={`delete-track-${id}`}
                 aria-label="Delete track"
             >
-                <DeleteIcon className="w-4 h-4" />
+                <Suspense fallback={<span className="inline-block w-4 h-4" />}>
+                    <DeleteIcon className="w-4 h-4" />
+                </Suspense>
             </button>
             <button
                 type="button"
@@ -76,7 +80,9 @@ export default function DropdownMenu({
                 data-testid={`upload-track-${id}`}
                 aria-label="Upload track"
             >
-                <UploadIcon className="w-4 h-4" />
+                <Suspense fallback={<span className="inline-block w-4 h-4" />}>
+                    <UploadIcon className="w-4 h-4" />
+                </Suspense>
             </button>
         </div>
     );

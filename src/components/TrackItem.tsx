@@ -118,16 +118,17 @@ const TrackItem = ({ track, styling = "default" }: Props) => {
                     isStreamingTrack ? "streaming-track" : `track-item-${id}`
                 }
             >
-                <div className="flex items-center justify-end">
-                    {track.album && (
-                        <div
-                            data-testid={`track-item-${id}-album`}
-                            className="border md:absolute bottom-2 right-0 m-2 p-1 border-gray-200 rounded text-sm text-gray-500"
-                        >
-                            {track.album}
-                        </div>
-                    )}
-                    {!isStreamingTrack && (
+                {!isStreamingTrack && (
+                    <div className="flex items-center justify-end">
+                        {track.album && (
+                            <div
+                                data-testid={`track-item-${id}-album`}
+                                className="border md:absolute bottom-2 right-0 m-2 p-1 border-gray-200 rounded text-sm text-gray-500"
+                            >
+                                {track.album}
+                            </div>
+                        )}
+
                         <div className="md:absolute top-0 right-0 m-2 flex gap-x-1.5 justify-end flex-grow">
                             <div className="relative" onClick={toggleChecked}>
                                 <CollectionIcon
@@ -143,6 +144,7 @@ const TrackItem = ({ track, styling = "default" }: Props) => {
                                     onChange={toggleChecked}
                                     checked={checked}
                                     data-testid={`track-checkbox-${id}`}
+                                    aria-label={`Select track ${track.title}`}
                                 />
                             </div>
                             <div className="relative">
@@ -168,8 +170,8 @@ const TrackItem = ({ track, styling = "default" }: Props) => {
                                 )}
                             </div>
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
                 <div className="flex items-center px-2 pt-2 pb-1 gap-x-2 lg:gap-x-6">
                     <div className="flex flex-shrink-0 justify-between gap-x-2 items-center">
                         <img
@@ -179,6 +181,7 @@ const TrackItem = ({ track, styling = "default" }: Props) => {
                                     : track.coverImage || defaultCover
                             }
                             alt={track.title}
+                            loading="lazy"
                             className="w-16 h-16 rounded object-cover"
                             data-testid={`track-item-${id}-cover-image`}
                         />

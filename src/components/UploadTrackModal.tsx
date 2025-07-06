@@ -126,6 +126,7 @@ export default function UploadTrackModal({
                         onChange={handleChangeFile}
                         className="block mt-4"
                         disabled={isBusy}
+                        aria-label="Upload track file"
                     />
                 )}
                 {error && <p className="text-red-500 text-sm">{error}</p>}

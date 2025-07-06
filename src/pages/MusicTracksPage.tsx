@@ -21,11 +21,13 @@ export default function MusicTracksPage() {
                 <div className="pb-4">
                     {activeTrack ? (
                         <>
-                            <h3 className="text-center">Our Streaming Track</h3>
-                            <TrackItem
-                                track={activeTrack}
-                                styling="streaming"
-                            />
+                            <h2 className="text-center">Our Streaming Track</h2>
+                            <ul>
+                                <TrackItem
+                                    track={activeTrack}
+                                    styling="streaming"
+                                />
+                            </ul>
                         </>
                     ) : (
                         <p className="text-gray-500 text-center">
