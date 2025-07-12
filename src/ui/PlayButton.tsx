@@ -20,12 +20,12 @@ export default function PlayButton({ id, isPlaying, onClick }: Props) {
         >
             {isPlaying ? (
                 <PauseIcon
-                    className="[&>path]:fill-green-600 group-hover:[&>path]:fill-green-700"
+                    className="[&>path]:fill-green-600 group-hover:[&>path]:fill-green-700 w-8 h-8"
                     aria-label={PAUSE_LABEL}
                 />
             ) : (
                 <PlayIcon
-                    className="[&>g>*]:fill-green-600 group-hover:[&>g>*]:fill-green-700"
+                    className="[&>g>*]:fill-green-600 group-hover:[&>g>*]:fill-green-700 w-8 h-8"
                     aria-label={PLAY_LABEL}
                 />
             )}

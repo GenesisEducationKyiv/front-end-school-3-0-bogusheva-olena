@@ -131,6 +131,7 @@ export default function Heading({ setTotalPages }: FiltersProps) {
                         className="border p-1 rounded w-full"
                         data-testid="sort-select"
                         disabled={isLoadingTracks}
+                        aria-label="Sort by"
                     >
                         {SORT_BY_OPTIONS.map((option) => (
                             <option key={option} value={option}>
@@ -144,6 +145,7 @@ export default function Heading({ setTotalPages }: FiltersProps) {
                         onChange={handleChange}
                         className="border p-1 rounded w-full"
                         disabled={isLoadingTracks}
+                        aria-label="Sort order"
                     >
                         {SORT_ORDER_OPTIONS.map((option) => (
                             <option key={option} value={option}>
@@ -186,6 +188,7 @@ export default function Heading({ setTotalPages }: FiltersProps) {
                         disabled={isLoadingTracks}
                         className="border p-1 rounded w-full"
                         data-testid="search-input"
+                        aria-label="Search"
                     />
                     <div className="relative w-full">
                         <input
@@ -204,6 +207,7 @@ export default function Heading({ setTotalPages }: FiltersProps) {
                             className="border p-1 rounded w-full"
                             data-testid="filter-genre"
                             disabled={isLoadingTracks || isLoadingGenres}
+                            aria-label="Search genre"
                         />
                         {showSuggestions && matchingGenres.length > 0 && (
                             <ul className="absolute left-0 top-full mt-1 bg-white border rounded w-full shadow z-10">
@@ -230,6 +234,7 @@ export default function Heading({ setTotalPages }: FiltersProps) {
                         disabled={isLoadingTracks}
                         className="border p-1 rounded w-full"
                         data-testid="filter-artist"
+                        aria-label="Search artist"
                     />
                 </div>
             </div>
