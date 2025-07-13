@@ -16,8 +16,8 @@ import { useUploadTrackFileMutation } from "../hooks/useUploadTrackFileMutation"
 import { useDeleteTrackFileMutation } from "../hooks/useDeleteTrackFileMutation";
 import { useToast } from "../hooks/useToast";
 
-import Loader from "../ui/Loader";
 import Modal from "../ui/Modal";
+import Button from "../ui/Button";
 
 export default function UploadTrackModal({
     isModalOpened,
@@ -133,43 +133,39 @@ export default function UploadTrackModal({
             </div>
             <div className="flex gap-x-2">
                 {track.audioFile ? (
-                    <button
+                    <Button
                         type="submit"
+                        variant="danger"
                         onClick={handleDeleteFile}
                         disabled={isBusy}
                         aria-disabled={isBusy}
                         data-loading={isBusy || undefined}
-                        className="flex bg-red-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                        loading={isPendingDeleteFile}
                     >
-                        {isPendingDeleteFile && (
-                            <Loader className="mr-2 [&>*]:fill-white" />
-                        )}
                         {isPendingDeleteFile ? "Removing..." : "Remove file"}
-                    </button>
+                    </Button>
                 ) : (
-                    <button
+                    <Button
                         type="submit"
                         disabled={isBusy}
                         aria-disabled={isBusy}
                         data-loading={isBusy || undefined}
-                        className="flex bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                         data-testid="track-modal-upload-button"
                         onClick={handleUploadFile}
+                        loading={isPendingUploadFile}
                     >
-                        {isPendingUploadFile && (
-                            <Loader className="mr-2 [&>*]:fill-white" />
-                        )}
                         Upload
-                    </button>
+                    </Button>
                 )}
-                <button
+                <Button
                     type="button"
+                    variant="secondary"
                     onClick={closeModal}
                     className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
                     data-testid="track-modal-close-button"
                 >
                     Close
-                </button>
+                </Button>
             </div>
         </Modal>
     );

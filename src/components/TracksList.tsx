@@ -67,7 +67,9 @@ export default function TracksList({ totalPages, setTotalPages }: Props) {
             {isLoadingTracks && (
                 <div className="mt-20 max-w-[120px] text-center mx-auto">
                     <Loader
-                        className="[&>*]:fill-gray-600 !h-20 !w-20 mx-auto mb-2"
+                        variant="dark"
+                        size="large"
+                        className="mx-auto mb-2"
                         testId="loading-tracks"
                     />
                     <p className="text-center">Loading tracks...</p>

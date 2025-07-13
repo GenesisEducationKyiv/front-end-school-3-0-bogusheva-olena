@@ -1,10 +1,10 @@
 import { FormikErrors, FormikHelpers, useFormik } from "formik";
-
-import Loader from "../ui/Loader";
-
-import CloseIcon from "../assets/icons/close.svg?react";
 import { Track, TrackFormValues } from "../types";
 import { trackFormSchema } from "../schemas/schemas";
+
+import Button from "../ui/Button";
+
+import CloseIcon from "../assets/icons/close.svg?react";
 
 type Props = {
     genres: string[];
@@ -12,7 +12,7 @@ type Props = {
     isLoading: boolean;
     onSubmit: (
         values: TrackFormValues,
-        formikHelpers: FormikHelpers<TrackFormValues>,
+        formikHelpers: FormikHelpers<TrackFormValues>
     ) => void;
     track?: Track;
 };
@@ -44,7 +44,7 @@ export default function TrackForm({
                     Object.entries(fieldErrors).map(([key, val]) => [
                         key,
                         val?.[0],
-                    ]),
+                    ])
                 );
 
             return formikErrors;
@@ -61,7 +61,7 @@ export default function TrackForm({
     const removeGenre = (genre: string) => {
         formik.setFieldValue(
             "genres",
-            formik.values.genres.filter((g) => g !== genre),
+            formik.values.genres.filter((g) => g !== genre)
         );
     };
     return (
@@ -158,14 +158,16 @@ export default function TrackForm({
                             className="bg-green-100 text-green-700 px-2 py-1 gap-x-1 rounded flex items-center"
                         >
                             {genre}
-                            <button
+                            <Button
+                                variant="ghost"
+                                size="small"
                                 type="button"
                                 onClick={() => removeGenre(genre)}
-                                className="text-red-500"
+                                className="!p-0"
                                 aria-label="Delete genre"
                             >
                                 <CloseIcon className="w-4 h-4" />
-                            </button>
+                            </Button>
                         </span>
                     ))}
                 </div>
@@ -181,37 +183,38 @@ export default function TrackForm({
                     {genres
                         .filter((g) => !formik.values.genres.includes(g))
                         .map((genre) => (
-                            <button
+                            <Button
+                                variant="ghost"
+                                size="small"
                                 type="button"
                                 key={genre}
                                 onClick={() => addGenre(genre)}
-                                className="px-2 py-1 bg-gray-200 rounded text-sm hover:bg-gray-300"
                             >
                                 + {genre}
-                            </button>
+                            </Button>
                         ))}
                 </div>
             </div>
             <div className="flex gap-x-2">
-                <button
+                <Button
                     type="submit"
                     disabled={isLoading}
                     aria-disabled={isLoading}
                     data-loading={isLoading || undefined}
-                    className="flex bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                     data-testid="submit-button"
+                    loading={isLoading}
                 >
-                    {isLoading && <Loader className="mr-2 [&>*]:fill-white" />}
                     Save
-                </button>
-                <button
+                </Button>
+                <Button
                     type="button"
+                    variant="secondary"
                     onClick={closeModal}
                     className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
                     data-testid="close-button"
                 >
                     Close
-                </button>
+                </Button>
             </div>
         </form>
     );

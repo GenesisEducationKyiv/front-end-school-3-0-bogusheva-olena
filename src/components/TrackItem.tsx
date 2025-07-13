@@ -18,6 +18,7 @@ import { useAudioPlayer } from "../context/player-context";
 
 import DropdownMenu from "./DropdownMenu";
 import PlayButton from "../ui/PlayButton";
+import Button from "../ui/Button";
 
 import defaultCover from "../assets/images/default_cover.webp";
 import MenuIcon from "../assets/icons/menu.svg?react";
@@ -148,9 +149,10 @@ const TrackItem = ({ track, styling = "default" }: Props) => {
                                 />
                             </div>
                             <div className="relative">
-                                <button
+                                <Button
                                     type="button"
-                                    className="border rounded p-1 text-sm hover:bg-gray-100"
+                                    variant="ghost"
+                                    size="small"
                                     onClick={() =>
                                         setIsMenuShown((prev) => !prev)
                                     }
@@ -158,7 +160,7 @@ const TrackItem = ({ track, styling = "default" }: Props) => {
                                     data-testid={`track-item-${id}-options-button`}
                                 >
                                     <MenuIcon className="w-4 h-4" />
-                                </button>
+                                </Button>
                                 {isMenuShown && (
                                     <DropdownMenu
                                         track={track}

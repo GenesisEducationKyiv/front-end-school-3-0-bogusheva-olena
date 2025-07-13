@@ -1,6 +1,7 @@
 import { ReactNode, useEffect } from "react";
 import { createPortal } from "react-dom";
 import CloseIcon from "../assets/icons/close.svg?react";
+import Button from "./Button";
 
 type Props = {
     isOpened: boolean;
@@ -45,17 +46,20 @@ export default function Modal({
             >
                 <div className="flex justify-between items-center mb-4 border-b pb-2 font-extrabold text-gray-500 ">
                     <div>{title}</div>
-                    <button
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="small"
                         onClick={onClose}
-                        className="absolute top-1 right-1 text-xxl"
+                        className="absolute top-1 right-1"
                         aria-label="Close modal"
                     >
                         <CloseIcon className="w-7 h-7 [&>*]:fill-gray-700" />
-                    </button>
+                    </Button>
                 </div>
                 {children}
             </div>
         </div>,
-        modalRoot,
+        modalRoot
     );
 }

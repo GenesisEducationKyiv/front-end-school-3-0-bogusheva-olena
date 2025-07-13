@@ -26,6 +26,8 @@ import { useTracksQuery } from "../hooks/useTracksQuery";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
 import { useModal } from "../hooks/useModal";
 
+import Button from "../ui/Button";
+
 type FiltersProps = {
     setTotalPages: Dispatch<SetStateAction<number>>;
 };
@@ -153,8 +155,8 @@ export default function Heading({ setTotalPages }: FiltersProps) {
                             </option>
                         ))}
                     </select>
-                    <button
-                        className="bg-red-600 w-full text-white px-2 py-1 rounded hover:bg-red-700 disabled:bg-gray-400"
+                    <Button
+                        variant="danger"
                         type="button"
                         onClick={handleOpenDeleteTracksModal}
                         disabled={
@@ -165,9 +167,8 @@ export default function Heading({ setTotalPages }: FiltersProps) {
                         data-testid="delete-tracks-button"
                     >
                         Delete tracks
-                    </button>
-                    <button
-                        className="bg-green-600 w-full text-white px-2 py-1 rounded hover:bg-green-700 disabled:bg-gray-400"
+                    </Button>
+                    <Button
                         type="button"
                         onClick={handleOpenCreateModal}
                         disabled={isLoadingTracks}
@@ -176,7 +177,7 @@ export default function Heading({ setTotalPages }: FiltersProps) {
                         data-testid="create-track-button"
                     >
                         Create Track
-                    </button>
+                    </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 items-center justify-center gap-x-4 gap-y-2">
                     <input
