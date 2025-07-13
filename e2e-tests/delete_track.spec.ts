@@ -14,7 +14,7 @@ test("delete a track, including failure and success scenarios", async ({
     await page.getByLabel("Title").fill(uniqueTitle);
     await page.keyboard.press("Tab");
 
-    await page.getByLabel("Artist").fill("Test Artist");
+    await page.getByTestId("input-artist").fill("Test Artist");
     await page.keyboard.press("Tab");
 
     await page.getByLabel("Album").fill("Test Album");

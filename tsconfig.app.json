@@ -10,7 +10,7 @@
             "node",
             "vitest",
             "@testing-library/jest-dom",
-            "@playwright/experimental-ct-react"
+            "@playwright/test"
         ],
 
         /* Bundler mode */
