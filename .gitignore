@@ -48,3 +48,5 @@ ehthumbs.db
 *.webm
 *.trace
 *.zip
+*storybook.log
+storybook-static
