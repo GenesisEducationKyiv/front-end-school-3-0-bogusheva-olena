@@ -1,19 +1,9 @@
-import React, { Suspense, useState } from "react";
+import React, { lazy, Suspense, useState } from "react";
 
-import {
-    DeleteTrackModalProps,
-    EditTrackModalProps,
-    Track,
-    UploadTrackModalProps,
-} from "../types";
+import { Track } from "../types";
 
 import { useModal } from "../hooks/useModal";
 import { useDeleteTracksStore } from "../store/delete-tracks-store";
-import {
-    selectAddToSelected,
-    selectRemoveFromSelected,
-    selectSelectedToDeleteTracks,
-} from "../store/selectors";
 import { useAudioPlayer } from "../context/player-context";
 
 import DropdownMenu from "./DropdownMenu";
@@ -25,6 +15,9 @@ import MenuIcon from "../assets/icons/menu.svg?react";
 import CollectionIcon from "../assets/icons/archive.svg?react";
 
 const WaveVisualizer = React.lazy(() => import("../ui/WaveVisualizer"));
+const EditTrackModal = lazy(() => import("./EditTrackModal"));
+const DeleteTrackModal = lazy(() => import("./DeleteTrackModal"));
+const UploadTrackModal = lazy(() => import("./UploadTrackModal"));
 
 type Props = {
     track: Track;
@@ -50,36 +43,8 @@ const TrackItem = ({ track, styling = "default" }: Props) => {
         isModalOpened: isUploadModalOpened,
     } = useModal();
 
-    // Dynamically import the EditTrackModal component
-    // to avoid loading it until it's needed
-    const [EditTrackModal, setEditTrackModal] =
-        useState<React.ComponentType<EditTrackModalProps> | null>(null);
-    const [DeleteTrackModal, setDeleteTrackModal] =
-        useState<React.ComponentType<DeleteTrackModalProps> | null>(null);
-    const [UploadTrackModal, setUploadTrackModal] =
-        useState<React.ComponentType<UploadTrackModalProps> | null>(null);
-
-    const handleOpenEditModal = async () => {
-        const module = await import("./EditTrackModal");
-        setEditTrackModal(() => module.default);
-        openEditModal();
-    };
-    const handleOpenDeleteModal = async () => {
-        const module = await import("./DeleteTrackModal");
-        setDeleteTrackModal(() => module.default);
-        openDeleteModal();
-    };
-    const handleOpenUploadModal = async () => {
-        const module = await import("./UploadTrackModal");
-        setUploadTrackModal(() => module.default);
-        openUploadModal();
-    };
-
-    const selectedToDeleteTracks = useDeleteTracksStore(
-        selectSelectedToDeleteTracks
-    );
-    const addToSelected = useDeleteTracksStore(selectAddToSelected);
-    const removeFromSelected = useDeleteTracksStore(selectRemoveFromSelected);
+    const { addToSelected, removeFromSelected, selectedToDeleteTracks } =
+        useDeleteTracksStore();
 
     const { playTrack, pauseTrack, isPlaying, currentTrackId } =
         useAudioPlayer();
@@ -165,9 +130,9 @@ const TrackItem = ({ track, styling = "default" }: Props) => {
                                     <DropdownMenu
                                         track={track}
                                         setShowMenu={setIsMenuShown}
-                                        openEditModal={handleOpenEditModal}
-                                        openDeleteModal={handleOpenDeleteModal}
-                                        openUploadModal={handleOpenUploadModal}
+                                        openEditModal={openEditModal}
+                                        openDeleteModal={openDeleteModal}
+                                        openUploadModal={openUploadModal}
                                     />
                                 )}
                             </div>
@@ -217,26 +182,32 @@ const TrackItem = ({ track, styling = "default" }: Props) => {
                     {!isStreamingTrack && <WaveVisualizer track={track} />}
                 </Suspense>
             </li>
-            {isEditModalOpened && EditTrackModal && (
-                <EditTrackModal
-                    track={track}
-                    isModalOpened={isEditModalOpened}
-                    closeModal={closeEditModal}
-                />
+            {isEditModalOpened && (
+                <Suspense fallback={null}>
+                    <EditTrackModal
+                        track={track}
+                        isModalOpened={isEditModalOpened}
+                        closeModal={closeEditModal}
+                    />
+                </Suspense>
             )}
-            {isDeleteModalOpened && DeleteTrackModal && (
-                <DeleteTrackModal
-                    isModalOpened={isDeleteModalOpened}
-                    closeModal={closeDeleteModal}
-                    track={track}
-                />
+            {isDeleteModalOpened && (
+                <Suspense fallback={null}>
+                    <DeleteTrackModal
+                        isModalOpened={isDeleteModalOpened}
+                        closeModal={closeDeleteModal}
+                        track={track}
+                    />
+                </Suspense>
             )}
-            {isUploadModalOpened && UploadTrackModal && (
-                <UploadTrackModal
-                    isModalOpened={isUploadModalOpened}
-                    closeModal={closeUploadModal}
-                    track={track}
-                />
+            {isUploadModalOpened && (
+                <Suspense fallback={null}>
+                    <UploadTrackModal
+                        isModalOpened={isUploadModalOpened}
+                        closeModal={closeUploadModal}
+                        track={track}
+                    />
+                </Suspense>
             )}
         </>
     );

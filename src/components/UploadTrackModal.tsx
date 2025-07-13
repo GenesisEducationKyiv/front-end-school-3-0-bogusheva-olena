@@ -11,7 +11,6 @@ import {
 import { logError } from "../utils/utils";
 
 import { useTrackStore } from "../store/track-store";
-import { selectUpdateTrackInList } from "../store/selectors";
 import { useUploadTrackFileMutation } from "../hooks/useUploadTrackFileMutation";
 import { useDeleteTrackFileMutation } from "../hooks/useDeleteTrackFileMutation";
 import { useToast } from "../hooks/useToast";
@@ -27,7 +26,7 @@ export default function UploadTrackModal({
     const [file, setFile] = useState<File | null>(null);
     const [error, setError] = useState("");
 
-    const updateTrackInList = useTrackStore(selectUpdateTrackInList);
+    const { updateTrackInList } = useTrackStore();
     const { showToast } = useToast();
 
     const {

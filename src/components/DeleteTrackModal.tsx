@@ -5,10 +5,6 @@ import { logError } from "../utils/utils";
 
 import { useDeleteTracksStore } from "../store/delete-tracks-store";
 import { useTrackStore } from "../store/track-store";
-import {
-    selectRemoveFromSelected,
-    selectRemoveTrackFromList,
-} from "../store/selectors";
 import { useDeleteTrackMutation } from "../hooks/useDeleteTrackMutation";
 import { useToast } from "../hooks/useToast";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
@@ -22,8 +18,8 @@ export default function DeleteTrackModal({
     track,
 }: DeleteTrackModalProps) {
     const { updateQueryParam } = useQueryParamsController();
-    const removeTrackFromList = useTrackStore(selectRemoveTrackFromList);
-    const removeFromSelected = useDeleteTracksStore(selectRemoveFromSelected);
+    const { removeTrackFromList } = useTrackStore();
+    const { removeFromSelected } = useDeleteTracksStore();
     const { showToast } = useToast();
     const { mutateAsync, isPending } = useDeleteTrackMutation();
 

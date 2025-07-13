@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { R, pipe } from "@mobily/ts-belt";
 
@@ -12,12 +12,6 @@ import { logError } from "../utils/utils";
 
 import { useDeleteTracksStore } from "../store/delete-tracks-store";
 import { useTrackStore } from "../store/track-store";
-import {
-    selectAllTracksIds,
-    selectSelectedToDeleteTracks,
-    selectSetSelectedToDeleteTracks,
-    selectSetTracks,
-} from "../store/selectors";
 import { useAllTracksQuery } from "../hooks/useAllTracksQuery";
 import { useToast } from "../hooks/useToast";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
@@ -41,16 +35,31 @@ export default function DeleteTracksModal({
     const isSelectedMode = mode === TRACK_DELETE_MODE.SELECTED;
     const isAllMode = mode === TRACK_DELETE_MODE.ALL;
 
-    const setTracks = useTrackStore(selectSetTracks);
-    const allTracksIds = useTrackStore(selectAllTracksIds);
+    const { setTracks, allTracksIds, setAllTracksIds } = useTrackStore();
+    const { selectedToDeleteTracks, setSelectedToDeleteTracks } =
+        useDeleteTracksStore();
 
-    const { isLoading: isLoadingAllTracks } = useAllTracksQuery();
-    const selectedToDeleteTracks = useDeleteTracksStore(
-        selectSelectedToDeleteTracks
+    const { data: res, isLoading: isLoadingAllTracks } = useAllTracksQuery();
+
+    useEffect(
+        () => {
+            if (res) {
+                pipe(
+                    res,
+                    R.tap((res) => {
+                        setAllTracksIds(res.data.map((t) => t.id));
+                    }),
+                    R.tapError((err) => {
+                        logError(err, "Error fetching tracks");
+                        showToast(TOAST_MESSAGES.FETCH_FAIL, "error");
+                    })
+                );
+            }
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [res]
     );
-    const setSelectedToDeleteTracks = useDeleteTracksStore(
-        selectSetSelectedToDeleteTracks
-    );
+
     const { showToast } = useToast();
     const { mutateAsync, isPending } = useDeleteTracksMutation();
 
