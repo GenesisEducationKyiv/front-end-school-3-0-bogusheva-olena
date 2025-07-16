@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { R, pipe } from "@mobily/ts-belt";
 
@@ -12,18 +12,12 @@ import { logError } from "../utils/utils";
 
 import { useDeleteTracksStore } from "../store/delete-tracks-store";
 import { useTrackStore } from "../store/track-store";
-import {
-    selectAllTracksIds,
-    selectSelectedToDeleteTracks,
-    selectSetSelectedToDeleteTracks,
-    selectSetTracks,
-} from "../store/selectors";
 import { useAllTracksQuery } from "../hooks/useAllTracksQuery";
 import { useToast } from "../hooks/useToast";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
 import { useDeleteTracksMutation } from "../hooks/useDeleteTracksMutation";
 
-import Loader from "../ui/Loader";
+import Button from "../ui/Button";
 import Modal from "../ui/Modal";
 
 export default function DeleteTracksModal({
@@ -41,16 +35,31 @@ export default function DeleteTracksModal({
     const isSelectedMode = mode === TRACK_DELETE_MODE.SELECTED;
     const isAllMode = mode === TRACK_DELETE_MODE.ALL;
 
-    const setTracks = useTrackStore(selectSetTracks);
-    const allTracksIds = useTrackStore(selectAllTracksIds);
+    const { setTracks, allTracksIds, setAllTracksIds } = useTrackStore();
+    const { selectedToDeleteTracks, setSelectedToDeleteTracks } =
+        useDeleteTracksStore();
 
-    const { isLoading: isLoadingAllTracks } = useAllTracksQuery();
-    const selectedToDeleteTracks = useDeleteTracksStore(
-        selectSelectedToDeleteTracks
+    const { data: res, isLoading: isLoadingAllTracks } = useAllTracksQuery();
+
+    useEffect(
+        () => {
+            if (res) {
+                pipe(
+                    res,
+                    R.tap((res) => {
+                        setAllTracksIds(res.data.map((t) => t.id));
+                    }),
+                    R.tapError((err) => {
+                        logError(err, "Error fetching tracks");
+                        showToast(TOAST_MESSAGES.FETCH_FAIL, "error");
+                    })
+                );
+            }
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [res]
     );
-    const setSelectedToDeleteTracks = useDeleteTracksStore(
-        selectSetSelectedToDeleteTracks
-    );
+
     const { showToast } = useToast();
     const { mutateAsync, isPending } = useDeleteTracksMutation();
 
@@ -125,49 +134,50 @@ export default function DeleteTracksModal({
                 } tracks.`}</p>
             </div>
             <div className="mb-2 text-end">
-                <button
+                <Button
+                    variant="ghost"
+                    size="small"
                     type="button"
                     onClick={toggleMode}
                     disabled={isToggleModeDisabled}
                     aria-disabled={isToggleModeDisabled}
                     data-testid="select-mode-toggle"
-                    className="text-sm text-red-500 underline font-extrabold disabled:text-gray-400"
                 >
                     {isSelectedMode
                         ? "Delete all tracks?"
                         : "Delete selected tracks?"}
-                </button>
+                </Button>
             </div>
             <div className="flex gap-x-2">
-                <button
+                <Button
                     type="submit"
+                    variant="danger"
                     disabled={isDeleteButtonDisabled}
                     aria-disabled={isDeleteButtonDisabled}
                     data-loading={isLoading || undefined}
-                    className="flex bg-red-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                    loading={isPending}
                     data-testid="bulk-delete-button"
                     onClick={handleDelete}
                 >
-                    {isPending && <Loader className="mr-2 [&>*]:fill-white" />}
                     {"Yes, delete"}
-                </button>
-                <button
+                </Button>
+                <Button
                     type="button"
                     onClick={handleClearSelected}
                     aria-disabled={!selectedToDeleteTracks.length || isLoading}
                     disabled={!selectedToDeleteTracks.length || isLoading}
-                    className="flex bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                 >
                     Clear all
-                </button>
-                <button
+                </Button>
+                <Button
+                    variant="secondary"
                     type="button"
                     onClick={closeModal}
                     className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
                     data-testid="cancel-delete"
                 >
                     Close
-                </button>
+                </Button>
             </div>
         </Modal>
     );

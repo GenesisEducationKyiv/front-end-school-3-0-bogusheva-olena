@@ -1,5 +1,6 @@
 import PlayIcon from "../assets/icons/play.svg?react";
 import PauseIcon from "../assets/icons/pause.svg?react";
+import Button from "./Button";
 
 type Props = {
     id: string;
@@ -12,9 +13,11 @@ const PAUSE_LABEL = "Pause track";
 
 export default function PlayButton({ id, isPlaying, onClick }: Props) {
     return (
-        <button
+        <Button
             type="button"
+            variant="ghost"
             onClick={onClick}
+            className="group !p-0"
             data-testid={isPlaying ? `pause-button-${id}` : `play-button-${id}`}
             aria-label={isPlaying ? PAUSE_LABEL : PLAY_LABEL}
         >
@@ -29,6 +32,6 @@ export default function PlayButton({ id, isPlaying, onClick }: Props) {
                     aria-label={PLAY_LABEL}
                 />
             )}
-        </button>
+        </Button>
     );
 }

@@ -1,7 +1,9 @@
-import React, {
+import {
     ChangeEvent,
     Dispatch,
+    lazy,
     SetStateAction,
+    Suspense,
     useEffect,
     useState,
 } from "react";
@@ -14,21 +16,21 @@ import {
     SORT_BY_OPTIONS,
     SORT_ORDER_OPTIONS,
 } from "../constants";
-import {
-    CreateTrackModalProps,
-    DeleteTracksModalProps,
-    isFilterKey,
-} from "../types";
+import { isFilterKey } from "../types";
 import { useGenres } from "../context/genres-context";
 import { useDeleteTracksStore } from "../store/delete-tracks-store";
-import { selectSelectedToDeleteTracks } from "../store/selectors";
 import { useTracksQuery } from "../hooks/useTracksQuery";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
 import { useModal } from "../hooks/useModal";
 
+import Button from "../ui/Button";
+
 type FiltersProps = {
     setTotalPages: Dispatch<SetStateAction<number>>;
 };
+
+const CreateTrackModal = lazy(() => import("./CreateTrackModal"));
+const DeleteTracksModal = lazy(() => import("./DeleteTracksModal"));
 
 export default function Heading({ setTotalPages }: FiltersProps) {
     const { filters, updateQueryParam } = useQueryParamsController();
@@ -40,9 +42,7 @@ export default function Heading({ setTotalPages }: FiltersProps) {
 
     const [showSuggestions, setShowSuggestions] = useState(false);
 
-    const selectedToDeleteTracks = useDeleteTracksStore(
-        selectSelectedToDeleteTracks
-    );
+    const { selectedToDeleteTracks } = useDeleteTracksStore();
     const { genres, isLoadingGenres } = useGenres();
     const { isLoading: isLoadingTracks } = useTracksQuery();
     const {
@@ -56,38 +56,24 @@ export default function Heading({ setTotalPages }: FiltersProps) {
         isModalOpened: isDeleteTracksModalOpened,
     } = useModal();
 
-    // Dynamically import the CreateTrackModal and DeleteTracksModal components
-    // to avoid loading them until they're needed
-    const [CreateTrackModal, setCreateTrackModal] =
-        useState<React.ComponentType<CreateTrackModalProps> | null>(null);
-    const [DeleteTracksModal, setDeleteTracksModal] =
-        useState<React.ComponentType<DeleteTracksModalProps> | null>(null);
-
-    const handleOpenCreateModal = async () => {
-        const module = await import("./CreateTrackModal");
-        setCreateTrackModal(() => module.default);
-        openCreateModal();
-    };
-    const handleOpenDeleteTracksModal = async () => {
-        const module = await import("./DeleteTracksModal");
-        setDeleteTracksModal(() => module.default);
-        openDeleteTracksModal();
-    };
-
     useEffect(() => {
         setDebounced({ search: filters.search, artist: filters.artist });
     }, [filters.search, filters.artist]);
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            updateQueryParam(QUERY_PARAMS.search, debounced.search.trim());
+            updateQueryParam(QUERY_PARAMS.search, debounced.search.trim(), {
+                resetPage: false,
+            });
         }, SEARCH_DEBOUNCE_MS);
         return () => clearTimeout(timeout);
     }, [debounced.search, updateQueryParam]);
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            updateQueryParam(QUERY_PARAMS.artist, debounced.artist.trim());
+            updateQueryParam(QUERY_PARAMS.artist, debounced.artist.trim(), {
+                resetPage: false,
+            });
         }, SEARCH_DEBOUNCE_MS);
         return () => clearTimeout(timeout);
     }, [debounced.artist, updateQueryParam]);
@@ -116,7 +102,7 @@ export default function Heading({ setTotalPages }: FiltersProps) {
         } else {
             const paramValue =
                 name === QUERY_PARAMS.genre ? capitalize(value) : value;
-            updateQueryParam(name, paramValue);
+            updateQueryParam(name, paramValue, { resetPage: false });
         }
     };
 
@@ -153,10 +139,10 @@ export default function Heading({ setTotalPages }: FiltersProps) {
                             </option>
                         ))}
                     </select>
-                    <button
-                        className="bg-red-600 w-full text-white px-2 py-1 rounded hover:bg-red-700 disabled:bg-gray-400"
+                    <Button
+                        variant="danger"
                         type="button"
-                        onClick={handleOpenDeleteTracksModal}
+                        onClick={openDeleteTracksModal}
                         disabled={
                             isLoadingTracks || !selectedToDeleteTracks.length
                         }
@@ -165,18 +151,17 @@ export default function Heading({ setTotalPages }: FiltersProps) {
                         data-testid="delete-tracks-button"
                     >
                         Delete tracks
-                    </button>
-                    <button
-                        className="bg-green-600 w-full text-white px-2 py-1 rounded hover:bg-green-700 disabled:bg-gray-400"
+                    </Button>
+                    <Button
                         type="button"
-                        onClick={handleOpenCreateModal}
+                        onClick={openCreateModal}
                         disabled={isLoadingTracks}
                         aria-disabled={isLoadingTracks}
                         data-loading={isLoadingTracks || undefined}
                         data-testid="create-track-button"
                     >
                         Create Track
-                    </button>
+                    </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 items-center justify-center gap-x-4 gap-y-2">
                     <input
@@ -238,18 +223,22 @@ export default function Heading({ setTotalPages }: FiltersProps) {
                     />
                 </div>
             </div>
-            {isCreateModalOpened && CreateTrackModal && (
-                <CreateTrackModal
-                    isModalOpened={isCreateModalOpened}
-                    closeModal={closeCreateModal}
-                />
+            {isDeleteTracksModalOpened && (
+                <Suspense fallback={null}>
+                    <DeleteTracksModal
+                        isModalOpened={isDeleteTracksModalOpened}
+                        closeModal={closeDeleteTracksModal}
+                        setTotalPages={setTotalPages}
+                    />
+                </Suspense>
             )}
-            {isDeleteTracksModalOpened && DeleteTracksModal && (
-                <DeleteTracksModal
-                    isModalOpened={isDeleteTracksModalOpened}
-                    closeModal={closeDeleteTracksModal}
-                    setTotalPages={setTotalPages}
-                />
+            {isCreateModalOpened && (
+                <Suspense fallback={null}>
+                    <CreateTrackModal
+                        isModalOpened={isCreateModalOpened}
+                        closeModal={closeCreateModal}
+                    />
+                </Suspense>
             )}
         </>
     );

@@ -74,6 +74,26 @@ export default defineConfig([
         },
     },
     {
+        files: [".storybook/**/*.{ts,tsx}"],
+        languageOptions: {
+            parser: tseslint.parser,
+            parserOptions: {
+                ecmaVersion: "latest",
+                sourceType: "module",
+                ecmaFeatures: { jsx: true },
+            },
+            globals: globals.node,
+        },
+        plugins: {
+            "@typescript-eslint": tseslint.plugin,
+            react: pluginReact,
+        },
+        rules: {
+            ...tseslint.configs.recommended.rules,
+            "react/react-in-jsx-scope": "off",
+        },
+    },
+    {
         ignores: ["node_modules", "dist", "build"],
     },
     {

@@ -1,4 +1,4 @@
-import { Track } from ".";
+import { Track } from "./type-main";
 
 export type TrackStore = {
     tracks: Track[];

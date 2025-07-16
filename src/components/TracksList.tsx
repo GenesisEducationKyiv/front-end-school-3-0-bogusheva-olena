@@ -3,7 +3,6 @@ import { R, pipe } from "@mobily/ts-belt";
 import { QUERY_PARAMS, TOAST_MESSAGES } from "../constants";
 import { logError } from "../utils/utils";
 import { useTrackStore } from "../store/track-store";
-import { selectSetTracks, selectTracks } from "../store/selectors";
 import { useToast } from "../hooks/useToast";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
 import { useTracksQuery } from "../hooks/useTracksQuery";
@@ -22,8 +21,7 @@ export default function TracksList({ totalPages, setTotalPages }: Props) {
 
     const currentPage = Number(filters.page) || 1;
 
-    const tracks = useTrackStore(selectTracks);
-    const setTracks = useTrackStore(selectSetTracks);
+    const { tracks, setTracks } = useTrackStore();
     const { showToast } = useToast();
 
     const { data: res, isLoading: isLoadingTracks } =
@@ -67,7 +65,9 @@ export default function TracksList({ totalPages, setTotalPages }: Props) {
             {isLoadingTracks && (
                 <div className="mt-20 max-w-[120px] text-center mx-auto">
                     <Loader
-                        className="[&>*]:fill-gray-600 !h-20 !w-20 mx-auto mb-2"
+                        variant="dark"
+                        size="large"
+                        className="mx-auto mb-2"
                         testId="loading-tracks"
                     />
                     <p className="text-center">Loading tracks...</p>

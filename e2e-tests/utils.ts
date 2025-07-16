@@ -1,4 +1,5 @@
 import { Page, expect } from "@playwright/test";
+import { Track } from "../src/types";
 
 export const BASE_URL = "http://localhost:8000";
 
@@ -15,7 +16,7 @@ export async function waitForTrackInApi(
                 );
                 const body = await response.json();
                 const titles = Array.isArray(body.data)
-                    ? body.data.map((t: any) => t.title)
+                    ? body.data.map((t: Track) => t.title)
                     : [];
 
                 return titles.includes(title);

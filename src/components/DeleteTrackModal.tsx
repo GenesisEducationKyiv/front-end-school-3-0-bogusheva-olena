@@ -5,15 +5,11 @@ import { logError } from "../utils/utils";
 
 import { useDeleteTracksStore } from "../store/delete-tracks-store";
 import { useTrackStore } from "../store/track-store";
-import {
-    selectRemoveFromSelected,
-    selectRemoveTrackFromList,
-} from "../store/selectors";
 import { useDeleteTrackMutation } from "../hooks/useDeleteTrackMutation";
 import { useToast } from "../hooks/useToast";
 import { useQueryParamsController } from "../hooks/useQueryParamsController";
 
-import Loader from "../ui/Loader";
+import Button from "../ui/Button";
 import Modal from "../ui/Modal";
 
 export default function DeleteTrackModal({
@@ -22,8 +18,8 @@ export default function DeleteTrackModal({
     track,
 }: DeleteTrackModalProps) {
     const { updateQueryParam } = useQueryParamsController();
-    const removeTrackFromList = useTrackStore(selectRemoveTrackFromList);
-    const removeFromSelected = useDeleteTracksStore(selectRemoveFromSelected);
+    const { removeTrackFromList } = useTrackStore();
+    const { removeFromSelected } = useDeleteTracksStore();
     const { showToast } = useToast();
     const { mutateAsync, isPending } = useDeleteTrackMutation();
 
@@ -59,26 +55,26 @@ export default function DeleteTrackModal({
                 </p>
             </div>
             <div className="flex gap-x-2">
-                <button
+                <Button
                     type="submit"
+                    variant="danger"
+                    loading={isPending}
+                    onClick={handleDelete}
                     disabled={isPending}
                     aria-disabled={isPending}
                     data-loading={isPending || undefined}
-                    className="flex bg-red-600 text-white px-4 py-2 rounded hover:bg-green-700"
                     data-testid="confirm-delete"
-                    onClick={handleDelete}
                 >
-                    {isPending && <Loader className="mr-2 [&>*]:fill-white" />}
                     {"Yes, delete"}
-                </button>
-                <button
+                </Button>
+                <Button
+                    variant="secondary"
                     type="button"
                     onClick={closeModal}
-                    className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
                     data-testid="cancel-delete"
                 >
                     Close
-                </button>
+                </Button>
             </div>
         </Modal>
     );
