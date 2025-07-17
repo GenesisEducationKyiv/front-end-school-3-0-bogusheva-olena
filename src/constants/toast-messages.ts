@@ -1,0 +1,15 @@
+export const TOAST_MESSAGES = {
+    CREATE_SUCCESS: "Track created successfully!",
+    CREATE_FAIL: "Failed to create track. Please try again.",
+    DELETE_SUCCESS: "Track deleted successfully!",
+    DELETE_FAIL: "Failed to delete the track. Please try again.",
+    MULTIDELETE_SUCCESS: "Tracks deleted successfully!",
+    MULTIDELETE_FAIL: "Failed to delete the tracks. Please try again.",
+    UPDATE_SUCCESS: "Track updated successfully!",
+    UPDATE_FAIL: "Failed to update track. Please try again.",
+    UPLOAD_FILE_SUCCESS: "Track uploaded successfully!",
+    UPLOAD_FILE_FAIL: "Failed to upload the track. Please try again.",
+    DELETE_FILE_SUCCESS: "Track file deleted successfully!",
+    DELETE_FILE_FAIL: "Failed to delete the track file. Please try again.",
+    FETCH_FAIL: "Failed to fetch tracks. Please try again.",
+};
