@@ -178,9 +178,11 @@ const TrackItem = ({ track, styling = "default" }: Props) => {
                         </p>
                     </div>
                 </div>
-                <Suspense fallback={null}>
-                    {!isStreamingTrack && <WaveVisualizer track={track} />}
-                </Suspense>
+                {isCurrent && !isStreamingTrack && (
+                    <Suspense fallback={null}>
+                        <WaveVisualizer track={track} />
+                    </Suspense>
+                )}
             </li>
             {isEditModalOpened && (
                 <Suspense fallback={null}>
