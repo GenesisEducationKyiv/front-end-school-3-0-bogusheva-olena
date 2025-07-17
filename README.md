@@ -21,7 +21,6 @@ npm start
 ### 2. Edit Track Metadata
 
 -   ✅ Modal pre-filled with track data.
--   ✅ Real-time UI update after saving changes.
 -   ✅ Covers all fields: title, artist, album, genres.
 
 ### 3. Upload and Remove Track File
@@ -34,7 +33,6 @@ npm start
 ### 4. Delete a Track
 
 -   ✅ Delete single track via modal.
--   ✅ Immediate removal from UI and backend.
 
 ### 5. List View with Pagination, Sorting, and Filtering
 
@@ -51,13 +49,14 @@ npm start
 -   Tracks can be selected with checkboxes and deleted together.
 -   "Select All" logic implemented.
 
-### ✔ Optimistic UI Updates
-
--   UI is updated before server confirmation, then verified.
-
 ### ✔ Audio Wave Visualization
 
 -   Waveform component (`WaveVisualizer`) animates during playback.
+
+### ✔ Real-Time Streaming with WebSocket
+
+-   Display of the currently playing track in real time using WebSocket.
+-   Backend repo: [music-app-backend](https://github.com/bogusheva-olena/music-app-backend)
 
 ## 🛠 Stack
 
@@ -65,16 +64,19 @@ npm start
 -   Vite
 -   Tailwind CSS
 -   Formik (forms)
--   Context API (state)
+-   Zustand (track management)
+-   React Query (track fetching, caching, mutations)
+-   Context API (genres, audio player)
 -   React Router v6
 -   Custom hook system (toasts, modals, etc.)
+-   Zod (validation)
+-   ts-belt (functional programming helpers)
 
 ## ⚙️ Optimization & Build Configuration
 
 ### 🔀 Code-Splitting & Lazy Loading
 
--   ✅ All modals (`EditTrackModal`, `DeleteTrackModal`, `UploadTrackModal`, `CreateTrackModal`, `DeleteTracksModal`) are dynamically imported **only when triggered**, reducing the initial bundle size.
--   ✅ `WaveVisualizer` is lazy-loaded via `React.lazy` and `<Suspense>`.
+-   ✅ All modals (`EditTrackModal`, `DeleteTrackModal`, `UploadTrackModal`, `CreateTrackModal`, `DeleteTracksModal`) and `WaveVisualizer` are lazy-loaded via `React.lazy` and `<Suspense>`, loaded only when needed to reduce the initial bundle size.
 -   ✅ `TrackForm` is automatically split by Vite due to its size.
 -   ✅ The app benefits from **automatic tree-shaking** (e.g. only used parts of `zod`/`lodash-es` are included).
 
@@ -94,3 +96,31 @@ A browser window with dist/stats.html will open automatically to display the bun
 
 Source maps are generated only when explicitly enabled. This helps debugging while avoiding code exposure in production.
 To enable source maps locally, add to your .env: GENERATE_SOURCEMAP=true
+
+## 🚀 CI/CD
+
+-   GitHub Actions configured for continuous integration.
+-   Linting, type checking, tests, and production build run automatically on each push.
+
+## 🧪 Testing
+
+-   Unit tests and integration tests written with Vitest.
+
+```bash
+npm run test
+```
+
+-   Component and E2E tests configured with Playwright.
+
+```bash
+npm run test:ct
+npm run test:e2e
+```
+
+## 📚 Storybook
+
+-   Interactive UI component explorer
+
+```bash
+npm run storybook
+```
